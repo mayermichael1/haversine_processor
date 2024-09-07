@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 typedef double  f64;
 typedef int     s32; 
 typedef char    u8;
 
-#define EARTH_RADIUS 6372.8
+#define EARTH_RADIUS    6372.8
+#define CLUSTER_DIVISOR 1000
+#define CLUSTER_RADIUS  7.5
 
 static f64
 degrees_to_radians (f64 degrees)
@@ -37,20 +40,56 @@ reference_haversine ( f64 lon1, f64 lat1, f64 lon2, f64 lat2, f64 earth_radius)
   return result;
 }
 
+static f64
+rand_0_to_1 ()
+{
+  f64 result = (f64)rand()/ (f64)RAND_MAX;
+  return result;
+}
+
 ///
 /// \brief  generate a random floating number between -180.0 and 180.0
 ///
 static f64
-generate_random_coordinate ()
+generate_random_coordinate (f64 coord = 0.0)
 {
-  s32 random_number = rand();
+  f64 result = 0.0;
+  f64 random = rand_0_to_1();
 
-  f64 factor = (f64)random_number / (f64)RAND_MAX;
+  if (coord == 0.0)
+    {
+      result = -180.0 + (360 * random);
+    }
+  else 
+    {
+      f64 delta = random * CLUSTER_RADIUS;
+      f64 new_coord = coord + delta;
 
-  f64 result = -180.0 + (360 * factor);
+      if (new_coord > 180.0)
+        {
+          f64 overflow_delta = new_coord - 180.0;
+          new_coord = -180.0 + overflow_delta;
+        }
+      else if (new_coord < -180.0)
+        {
+          f64 overflow_delta = new_coord - -180.0;
+          new_coord = 180.0 + overflow_delta;
+        }
+      result = new_coord;
+    }
+
   return result;
 }
 
+static void
+get_random_cluster_coords (s32 cluster_ammount, f64 *cluster_lon_coords, f64 *cluster_lat_coords, f64 *lon, f64 *lat)
+{
+  f64 random = rand_0_to_1();
+  s32 cluster_number = round(cluster_ammount * random);
+  printf("%i / %i \n", cluster_number, cluster_ammount);
+  *lon = cluster_lon_coords[cluster_number];
+  *lat = cluster_lat_coords[cluster_number];
+}
 
 s32 
 main (s32 argc, u8** argv)
@@ -58,6 +97,10 @@ main (s32 argc, u8** argv)
   s32 output_ammount = 0;
   s32 seed = 0;
   f64 haversine_sum = 0;
+  bool cluster = false;
+  s32 cluster_ammount = 0;
+  f64 *cluster_lat_coords;
+  f64 *cluster_lon_coords;
 
   if (argc >= 2)
     {
@@ -71,7 +114,30 @@ main (s32 argc, u8** argv)
       seed = atoi(parameter);
     }
 
+  if (argc >= 4)
+    {
+      if (strcmp(argv[3], "-cluster") == 0)
+        {
+          cluster = true;
+        }
+    }
+
   srand(seed);
+
+  if (cluster)
+    {
+      f64 random = rand_0_to_1();
+      cluster_ammount = 1 + (output_ammount / CLUSTER_DIVISOR) * random;
+
+      cluster_lat_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
+      cluster_lon_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
+
+      for (int i = 0; i < cluster_ammount; i++)
+        {
+          cluster_lon_coords[i] = generate_random_coordinate();
+          cluster_lat_coords[i] = generate_random_coordinate();
+        }
+    }
 
   FILE *fp = fopen("output.json", "w");
   if (fp)
@@ -80,10 +146,37 @@ main (s32 argc, u8** argv)
       fprintf(fp, "\t\"pairs\": [\n");
       for (int i = 1; i <= output_ammount; i++)
         {
-          f64 lon1 = generate_random_coordinate();
-          f64 lon2 = generate_random_coordinate();
-          f64 lat1 = generate_random_coordinate();
-          f64 lat2 = generate_random_coordinate();
+          s32 cluster_number = 0;
+          f64 cluster_lon = 0.0;
+          f64 cluster_lat = 0.0;
+          if (cluster)
+            {
+              get_random_cluster_coords (
+                cluster_ammount, 
+                cluster_lon_coords,
+                cluster_lat_coords,
+                &cluster_lon,
+                &cluster_lat
+              );
+            }
+
+          f64 lon1 = generate_random_coordinate(cluster_lon);
+          f64 lat1 = generate_random_coordinate(cluster_lat);
+
+          if (cluster)
+            {
+              get_random_cluster_coords (
+                cluster_ammount, 
+                cluster_lon_coords,
+                cluster_lat_coords,
+                &cluster_lon,
+                &cluster_lat
+              );
+            }
+
+
+          f64 lon2 = generate_random_coordinate(cluster_lon);
+          f64 lat2 = generate_random_coordinate(cluster_lat);
 
           fprintf(fp, "\t\t{");
           fprintf(fp, "\"x0\":%.10f, ", lon1);
