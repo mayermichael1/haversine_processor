@@ -57,6 +57,7 @@ main (s32 argc, u8** argv)
 {
   s32 output_ammount = 0;
   s32 seed = 0;
+  f64 haversine_sum = 0;
 
   if (argc >= 2)
     {
@@ -76,12 +77,19 @@ main (s32 argc, u8** argv)
   printf("\t\"pairs\": [\n");
   for (int i = 1; i <= output_ammount; i++)
     {
+      f64 lon1 = generate_random_coordinate();
+      f64 lon2 = generate_random_coordinate();
+      f64 lat1 = generate_random_coordinate();
+      f64 lat2 = generate_random_coordinate();
+
       printf("\t\t{");
-      printf("\"x0\":%.10f, ", generate_random_coordinate());
-      printf("\"y0\":%.10f, ", generate_random_coordinate());
-      printf("\"x1\":%.10f, ", generate_random_coordinate());
-      printf("\"y1\":%.10f  ", generate_random_coordinate());
+      printf("\"x0\":%.10f, ", lon1);
+      printf("\"y0\":%.10f, ", lat1);
+      printf("\"x1\":%.10f, ", lon2);
+      printf("\"y1\":%.10f  ", lat2);
       printf("}");
+
+      haversine_sum += reference_haversine(lon1, lat1, lon2, lat2, EARTH_RADIUS);
 
       if (i != output_ammount)
         {
@@ -90,9 +98,12 @@ main (s32 argc, u8** argv)
 
       printf("\n");
     }
+
   printf("\t]\n");
   printf("}\n");
 
+  printf("sum: %f\n", haversine_sum);
+  printf("avg: %f\n", (haversine_sum/output_ammount));
 
   return 0;
 }
