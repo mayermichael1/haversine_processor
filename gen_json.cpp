@@ -1,8 +1,10 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <math.h>
 
-typedef double f64;
+typedef double  f64;
+typedef int     s32; 
+typedef char    u8;
 
 #define EARTH_RADIUS 6372.8
 
@@ -35,10 +37,62 @@ reference_haversine ( f64 lon1, f64 lat1, f64 lon2, f64 lat2, f64 earth_radius)
   return result;
 }
 
-int 
-main ()
+///
+/// \brief  generate a random floating number between -180.0 and 180.0
+///
+static f64
+generate_random_coordinate ()
 {
-  f64 haversine = reference_haversine(15.0, 14.0, 90.5, -2.0, EARTH_RADIUS);
-  printf("haversine: %f \n", haversine);
+  s32 random_number = rand();
+
+  f64 factor = (f64)random_number / (f64)RAND_MAX;
+
+  f64 result = -180.0 + (360 * factor);
+  return result;
+}
+
+
+s32 
+main (s32 argc, u8** argv)
+{
+  s32 output_ammount = 0;
+  s32 seed = 0;
+
+  if (argc >= 2)
+    {
+      u8 *parameter = argv[1];
+      output_ammount = atoi(parameter);
+    }
+
+  if (argc >= 3)
+    {
+      u8 *parameter = argv[2];
+      seed = atoi(parameter);
+    }
+
+  srand(seed);
+
+  printf("{\n");
+  printf("\t\"pairs\": [\n");
+  for (int i = 1; i <= output_ammount; i++)
+    {
+      printf("\t\t{");
+      printf("\"x0\":%.10f, ", generate_random_coordinate());
+      printf("\"y0\":%.10f, ", generate_random_coordinate());
+      printf("\"x1\":%.10f, ", generate_random_coordinate());
+      printf("\"y1\":%.10f  ", generate_random_coordinate());
+      printf("}");
+
+      if (i != output_ammount)
+        {
+          printf(",");
+        }
+
+      printf("\n");
+    }
+  printf("\t]\n");
+  printf("}\n");
+
+
   return 0;
 }
