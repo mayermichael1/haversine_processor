@@ -73,37 +73,44 @@ main (s32 argc, u8** argv)
 
   srand(seed);
 
-  printf("{\n");
-  printf("\t\"pairs\": [\n");
-  for (int i = 1; i <= output_ammount; i++)
+  FILE *fp = fopen("output.json", "w");
+  if (fp)
     {
-      f64 lon1 = generate_random_coordinate();
-      f64 lon2 = generate_random_coordinate();
-      f64 lat1 = generate_random_coordinate();
-      f64 lat2 = generate_random_coordinate();
-
-      printf("\t\t{");
-      printf("\"x0\":%.10f, ", lon1);
-      printf("\"y0\":%.10f, ", lat1);
-      printf("\"x1\":%.10f, ", lon2);
-      printf("\"y1\":%.10f  ", lat2);
-      printf("}");
-
-      haversine_sum += reference_haversine(lon1, lat1, lon2, lat2, EARTH_RADIUS);
-
-      if (i != output_ammount)
+      fprintf(fp, "{\n");
+      fprintf(fp, "\t\"pairs\": [\n");
+      for (int i = 1; i <= output_ammount; i++)
         {
-          printf(",");
+          f64 lon1 = generate_random_coordinate();
+          f64 lon2 = generate_random_coordinate();
+          f64 lat1 = generate_random_coordinate();
+          f64 lat2 = generate_random_coordinate();
+
+          fprintf(fp, "\t\t{");
+          fprintf(fp, "\"x0\":%.10f, ", lon1);
+          fprintf(fp, "\"y0\":%.10f, ", lat1);
+          fprintf(fp, "\"x1\":%.10f, ", lon2);
+          fprintf(fp, "\"y1\":%.10f  ", lat2);
+          fprintf(fp, "}");
+
+          haversine_sum += reference_haversine(lon1, lat1, lon2, lat2, EARTH_RADIUS);
+
+          if (i != output_ammount)
+            {
+              fprintf(fp, ",");
+            }
+
+          fprintf(fp, "\n");
         }
 
-      printf("\n");
+      fprintf(fp, "\t]\n");
+      fprintf(fp, "}\n");
     }
 
-  printf("\t]\n");
-  printf("}\n");
+  fclose(fp);
 
   printf("sum: %f\n", haversine_sum);
   printf("avg: %f\n", (haversine_sum/output_ammount));
+
 
   return 0;
 }
