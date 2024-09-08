@@ -18,6 +18,41 @@ struct coordinate
   f64 latitude;
 };
 
+coordinate 
+operator+ (coordinate a, coordinate b)
+{
+  coordinate result = {};
+  result.latitude = a.latitude + b.latitude;
+  result.longitude = a.longitude + b.longitude;
+  return result;
+}
+
+coordinate 
+operator+ (coordinate a, f64 delta)
+{
+  coordinate result = {};
+  result.latitude = a.latitude + delta;
+  result.longitude = a.longitude + delta;
+  return result;
+}
+
+inline f64 
+keep_degrees_in_constraint (f64 degree)
+{
+  if (degree > 180.0)
+    {
+      f64 overflow_delta = degree - 180.0;
+      degree = -180.0 + overflow_delta;
+    }
+  else if (degree < -180.0)
+    {
+      f64 overflow_delta = degree - -180.0;
+      degree = 180.0 + overflow_delta;
+    }
+  return degree;
+}
+
+
 static f64
 degrees_to_radians (f64 degrees)
 {
@@ -58,44 +93,38 @@ rand_0_to_1 ()
 ///
 /// \brief  generate a random floating number between -180.0 and 180.0
 ///
-static f64
-generate_random_coordinate (f64 coord = 0.0)
+static coordinate
+generate_random_coordinate (coordinate cluster_point = {})
 {
-  f64 result = 0.0;
+  coordinate coord;
   f64 random = rand_0_to_1();
 
-  if (coord == 0.0)
+  if (cluster_point.latitude == 0.0 && cluster_point.longitude == 0.0)
     {
-      result = -180.0 + (360 * random);
+      coord.longitude = -180.0 + (360 * random);
+      coord.latitude = -180.0 + (360 * random);
     }
   else 
     {
       f64 delta = random * CLUSTER_RADIUS;
-      f64 new_coord = coord + delta;
+      coordinate new_coord = cluster_point + delta;
 
-      if (new_coord > 180.0)
-        {
-          f64 overflow_delta = new_coord - 180.0;
-          new_coord = -180.0 + overflow_delta;
-        }
-      else if (new_coord < -180.0)
-        {
-          f64 overflow_delta = new_coord - -180.0;
-          new_coord = 180.0 + overflow_delta;
-        }
-      result = new_coord;
+      new_coord.longitude = keep_degrees_in_constraint(new_coord.longitude);
+      new_coord.latitude = keep_degrees_in_constraint(new_coord.latitude);
+
+      coord = new_coord;
     }
 
-  return result;
+  return coord;
 }
 
 static void
-get_random_cluster_coords (s32 cluster_ammount, f64 *cluster_lon_coords, f64 *cluster_lat_coords, f64 *lon, f64 *lat)
+get_random_cluster_coords (s32 cluster_ammount, coordinate *cluster_coords, coordinate *cluster)
 {
   f64 random = rand_0_to_1();
   s32 cluster_number = round(cluster_ammount * random);
-  *lon = cluster_lon_coords[cluster_number];
-  *lat = cluster_lat_coords[cluster_number];
+  cluster->longitude = cluster_coords[cluster_number].longitude;
+  cluster->latitude = cluster_coords[cluster_number].latitude;
 }
 
 s32 
@@ -106,8 +135,7 @@ main (s32 argc, u8** argv)
   f64 haversine_sum = 0;
   bool cluster = false;
   s32 cluster_ammount = 0;
-  f64 *cluster_lat_coords;
-  f64 *cluster_lon_coords;
+  coordinate *cluster_coords;
 
   if (argc >= 2)
     {
@@ -141,13 +169,11 @@ main (s32 argc, u8** argv)
       f64 random = rand_0_to_1();
       cluster_ammount = round(32 * random);
 
-      cluster_lat_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
-      cluster_lon_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
+      cluster_coords = (coordinate*)malloc(sizeof(coordinate) * cluster_ammount);
 
       for (int i = 0; i < cluster_ammount; i++)
         {
-          cluster_lon_coords[i] = generate_random_coordinate();
-          cluster_lat_coords[i] = generate_random_coordinate();
+          cluster_coords[i] = generate_random_coordinate({});
         }
     }
 
@@ -158,46 +184,38 @@ main (s32 argc, u8** argv)
       fprintf(fp, "\t\"pairs\": [\n");
       for (int i = 1; i <= output_ammount; i++)
         {
-          s32 cluster_number = 0;
-          f64 cluster_lon = 0.0;
-          f64 cluster_lat = 0.0;
+          coordinate cluster_coord = {};
           if (cluster)
             {
               get_random_cluster_coords (
                 cluster_ammount, 
-                cluster_lon_coords,
-                cluster_lat_coords,
-                &cluster_lon,
-                &cluster_lat
+                cluster_coords,
+                &cluster_coord
               );
             }
 
-          f64 lon1 = generate_random_coordinate(cluster_lon);
-          f64 lat1 = generate_random_coordinate(cluster_lat);
+          coordinate coord1 = generate_random_coordinate(cluster_coord);
 
           if (cluster)
             {
               get_random_cluster_coords (
                 cluster_ammount, 
-                cluster_lon_coords,
-                cluster_lat_coords,
-                &cluster_lon,
-                &cluster_lat
+                cluster_coords,
+                &cluster_coord
               );
             }
 
 
-          f64 lon2 = generate_random_coordinate(cluster_lon);
-          f64 lat2 = generate_random_coordinate(cluster_lat);
+          coordinate coord2 = generate_random_coordinate(cluster_coord);
 
           fprintf(fp, "\t\t{");
-          fprintf(fp, "\"x0\":%.20f, ", lon1);
-          fprintf(fp, "\"y0\":%.20f, ", lat1);
-          fprintf(fp, "\"x1\":%.20f, ", lon2);
-          fprintf(fp, "\"y1\":%.20f  ", lat2);
+          fprintf(fp, "\"x0\":%.20f, ", coord1.longitude);
+          fprintf(fp, "\"y0\":%.20f, ", coord1.latitude);
+          fprintf(fp, "\"x1\":%.20f, ", coord2.longitude);
+          fprintf(fp, "\"y1\":%.20f  ", coord2.latitude);
           fprintf(fp, "}");
 
-          haversine_sum += reference_haversine({lon1, lat1}, {lon2, lat2}, EARTH_RADIUS);
+          haversine_sum += reference_haversine(coord1, coord2, EARTH_RADIUS);
 
           if (i != output_ammount)
             {
