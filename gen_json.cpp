@@ -127,6 +127,20 @@ get_random_cluster_coords (s32 cluster_ammount, coordinate *cluster_coords, coor
   cluster->latitude = cluster_coords[cluster_number].latitude;
 }
 
+static void
+generate_random_clusters (s32 *cluster_ammount, coordinate *cluster_coords)
+{      
+  f64 random = rand_0_to_1();
+  *cluster_ammount = round(32 * random);
+
+  cluster_coords = (coordinate*)malloc(sizeof(coordinate) * (*cluster_ammount));
+
+  for (int i = 0; i < (*cluster_ammount); i++)
+    {
+      cluster_coords[i] = generate_random_coordinate({});
+    }
+}
+
 s32 
 main (s32 argc, u8** argv)
 {
@@ -134,8 +148,8 @@ main (s32 argc, u8** argv)
   s32 seed = 0;
   f64 haversine_sum = 0;
   bool cluster = false;
-  s32 cluster_ammount = 0;
   coordinate *cluster_coords;
+  s32 cluster_ammount = 0;
 
   if (argc >= 2)
     {
@@ -148,7 +162,6 @@ main (s32 argc, u8** argv)
       u8 *parameter = argv[2];
       seed = atoi(parameter);
     }
-
 
   if (argc >= 4)
     {
@@ -166,15 +179,7 @@ main (s32 argc, u8** argv)
 
   if (cluster)
     {
-      f64 random = rand_0_to_1();
-      cluster_ammount = round(32 * random);
-
-      cluster_coords = (coordinate*)malloc(sizeof(coordinate) * cluster_ammount);
-
-      for (int i = 0; i < cluster_ammount; i++)
-        {
-          cluster_coords[i] = generate_random_coordinate({});
-        }
+      generate_random_clusters(&cluster_ammount, cluster_coords);
     }
 
   FILE *fp = fopen("output.json", "w");
@@ -215,14 +220,14 @@ main (s32 argc, u8** argv)
           fprintf(fp, "\"y1\":%.20f  ", coord2.latitude);
           fprintf(fp, "}");
 
-          haversine_sum += reference_haversine(coord1, coord2, EARTH_RADIUS);
-
           if (i != output_ammount)
             {
               fprintf(fp, ",");
             }
 
           fprintf(fp, "\n");
+
+          haversine_sum += reference_haversine(coord1, coord2, EARTH_RADIUS);
         }
 
       fprintf(fp, "\t]\n");
