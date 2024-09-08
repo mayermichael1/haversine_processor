@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 typedef double  f64;
 typedef int     s32; 
@@ -86,7 +87,6 @@ get_random_cluster_coords (s32 cluster_ammount, f64 *cluster_lon_coords, f64 *cl
 {
   f64 random = rand_0_to_1();
   s32 cluster_number = round(cluster_ammount * random);
-  printf("%i / %i \n", cluster_number, cluster_ammount);
   *lon = cluster_lon_coords[cluster_number];
   *lat = cluster_lat_coords[cluster_number];
 }
@@ -114,6 +114,7 @@ main (s32 argc, u8** argv)
       seed = atoi(parameter);
     }
 
+
   if (argc >= 4)
     {
       if (strcmp(argv[3], "-cluster") == 0)
@@ -122,12 +123,16 @@ main (s32 argc, u8** argv)
         }
     }
 
+  if (seed == 0)
+    {
+      seed = time(0);
+    }
   srand(seed);
 
   if (cluster)
     {
       f64 random = rand_0_to_1();
-      cluster_ammount = 1 + (output_ammount / CLUSTER_DIVISOR) * random;
+      cluster_ammount = round(32 * random);
 
       cluster_lat_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
       cluster_lon_coords = (f64*)malloc(sizeof(f64) * cluster_ammount);
@@ -179,10 +184,10 @@ main (s32 argc, u8** argv)
           f64 lat2 = generate_random_coordinate(cluster_lat);
 
           fprintf(fp, "\t\t{");
-          fprintf(fp, "\"x0\":%.10f, ", lon1);
-          fprintf(fp, "\"y0\":%.10f, ", lat1);
-          fprintf(fp, "\"x1\":%.10f, ", lon2);
-          fprintf(fp, "\"y1\":%.10f  ", lat2);
+          fprintf(fp, "\"x0\":%.20f, ", lon1);
+          fprintf(fp, "\"y0\":%.20f, ", lat1);
+          fprintf(fp, "\"x1\":%.20f, ", lon2);
+          fprintf(fp, "\"y1\":%.20f  ", lat2);
           fprintf(fp, "}");
 
           haversine_sum += reference_haversine(lon1, lat1, lon2, lat2, EARTH_RADIUS);
@@ -203,6 +208,10 @@ main (s32 argc, u8** argv)
 
   printf("sum: %f\n", haversine_sum);
   printf("avg: %f\n", (haversine_sum/output_ammount));
+  if (cluster)
+    {
+      printf("clustered output\n");
+    }
 
 
   return 0;
