@@ -12,6 +12,12 @@ typedef char    u8;
 #define CLUSTER_DIVISOR 1000
 #define CLUSTER_RADIUS  7.5
 
+struct coordinate
+{
+  f64 longitude;
+  f64 latitude;
+};
+
 static f64
 degrees_to_radians (f64 degrees)
 {
@@ -23,16 +29,17 @@ degrees_to_radians (f64 degrees)
 /// \brief  reference haversine calculation
 ///
 static f64 
-reference_haversine ( f64 lon1, f64 lat1, f64 lon2, f64 lat2, f64 earth_radius)
+reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
 {
-  f64 delta_lat = degrees_to_radians(lat2 - lat1); 
-  f64 delta_lon = degrees_to_radians(lon2 - lon1);
+  f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
+  f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
   
-  lat1 = degrees_to_radians(lat1);
-  lat2 = degrees_to_radians(lat2);
+  coord1.latitude = degrees_to_radians(coord1.latitude);
+  coord2.latitude = degrees_to_radians(coord2.latitude);
 
   f64 a = pow(sin(delta_lat/2.0), 2.0) + 
-          cos(lat1) * cos(lat2) * pow(sin(delta_lon/2.0), 2.0); 
+          cos(coord1.latitude) * cos(coord2.latitude) * 
+          pow(sin(delta_lon/2.0), 2.0); 
   
   f64 c = 2.0 * asin(sqrt(a));
 
@@ -190,7 +197,7 @@ main (s32 argc, u8** argv)
           fprintf(fp, "\"y1\":%.20f  ", lat2);
           fprintf(fp, "}");
 
-          haversine_sum += reference_haversine(lon1, lat1, lon2, lat2, EARTH_RADIUS);
+          haversine_sum += reference_haversine({lon1, lat1}, {lon2, lat2}, EARTH_RADIUS);
 
           if (i != output_ammount)
             {
