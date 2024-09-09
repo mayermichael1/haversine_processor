@@ -6,16 +6,29 @@
 #
 CXX=g++
 OPT=-O0
-CXXFLAGS= $(OPT) -g
+DEPFLAGS=-MP -MD
+CXXFLAGS= $(OPT) $(DEPFLAGS) -g 
 
 BUILDDIR=./output
 BINARY=$(BUILDDIR)/gen_json.out
 
+
+SRCDIRS=. src
+
+CPPFILES:=$(foreach dir, $(SRCDIRS), $(wildcard $(dir)/*.cpp))
+OBJFILES:=$(addprefix output/, $(addsuffix .o, $(basename $(notdir $(CPPFILES)))))
+DEPFILES:=$(addprefix output/, $(addsuffix .d, $(basename $(notdir $(CPPFILES)))))
+
 all: $(BINARY)
 
-$(BINARY) : gen_json.cpp
-	$(CXX) $(CXXFLAGS) -o $@ gen_json.cpp
+$(BINARY) : $(OBJFILES)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(BUILDDIR)/%.o : %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+-include $(DEPFILES)
 
 .PHONY : clean
 clean: 
-	rm $(BUILDDIR)/*
+	rm $(BINARY)
