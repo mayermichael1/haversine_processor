@@ -4,84 +4,8 @@
 #include <string.h>
 #include <time.h>
 
-typedef double  f64;
-typedef int     s32; 
-typedef char    u8;
-
-#define EARTH_RADIUS    6372.8
-#define CLUSTER_DIVISOR 1000
-#define CLUSTER_RADIUS  7.5
-
-struct coordinate
-{
-  f64 longitude;
-  f64 latitude;
-};
-
-coordinate 
-operator+ (coordinate a, coordinate b)
-{
-  coordinate result = {};
-  result.latitude = a.latitude + b.latitude;
-  result.longitude = a.longitude + b.longitude;
-  return result;
-}
-
-coordinate 
-operator+ (coordinate a, f64 delta)
-{
-  coordinate result = {};
-  result.latitude = a.latitude + delta;
-  result.longitude = a.longitude + delta;
-  return result;
-}
-
-inline f64 
-keep_degrees_in_constraint (f64 degree)
-{
-  if (degree > 180.0)
-    {
-      f64 overflow_delta = degree - 180.0;
-      degree = -180.0 + overflow_delta;
-    }
-  else if (degree < -180.0)
-    {
-      f64 overflow_delta = degree - -180.0;
-      degree = 180.0 + overflow_delta;
-    }
-  return degree;
-}
-
-
-static f64
-degrees_to_radians (f64 degrees)
-{
-  f64 result = 0.01745329251994329577f * degrees;
-  return result;
-}
-
-///
-/// \brief  reference haversine calculation
-///
-static f64 
-reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
-{
-  f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
-  f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
-  
-  coord1.latitude = degrees_to_radians(coord1.latitude);
-  coord2.latitude = degrees_to_radians(coord2.latitude);
-
-  f64 a = pow(sin(delta_lat/2.0), 2.0) + 
-          cos(coord1.latitude) * cos(coord2.latitude) * 
-          pow(sin(delta_lon/2.0), 2.0); 
-  
-  f64 c = 2.0 * asin(sqrt(a));
-
-  f64 result = earth_radius * c;
-
-  return result;
-}
+#include "types.h"
+#include "calc.h"
 
 static f64
 rand_0_to_1 ()
