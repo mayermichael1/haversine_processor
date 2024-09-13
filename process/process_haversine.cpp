@@ -1,7 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "types.h"
+#include "../include/types.h"
+
+static u8*
+read_file (u8 *file_name, s32 *size)
+{
+  FILE *fp = fopen(file_name, "rb");
+  u8 *memory = NULL;
+
+  if (fp)
+    {
+      fseek(fp, 0, SEEK_END);
+      *size = ftell(fp); 
+      rewind(fp);
+      memory = (u8*)malloc(*size);
+      fread(memory, sizeof(u8), *size, fp);
+      fclose(fp);
+    }
+
+  return memory;
+}
 
 s32
 main (s32 argc, u8 **argv)
@@ -14,17 +33,8 @@ main (s32 argc, u8 **argv)
     {
       json_file_name = argv[1];
     }
-
-  FILE *fp = fopen(json_file_name, "rb");
-  if (fp)
-    {
-      fseek(fp, 0, SEEK_END);
-      json_size = ftell(fp); 
-      rewind(fp);
-      json_memory = (u8*)malloc(json_size);
-      fread(json_memory, sizeof(u8), json_size, fp);
-      fclose(fp);
-    }
+  
+  json_memory = read_file(json_file_name, &json_size);
 
   if (json_size > 10)
     {
