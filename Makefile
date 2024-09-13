@@ -2,9 +2,13 @@ CXX=g++
 OPT=-O0
 DEPFLAGS=-MP -MD
 
-BUILDDIR=./build
-SRCDIRS=. shared
 INCLUDEDIRS=. include
+BUILDDIR=./build
+
+CXXFLAGS= $(OPT) $(DEPFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
+
+# binary gen
+SRCDIRS=gen shared
 
 CPPFILES:=$(foreach dir, $(SRCDIRS), $(wildcard $(dir)/*.cpp))
 
@@ -16,15 +20,31 @@ DEPFILES:=$(patsubst %.cpp, %.d, $(CPPFILES))
 DEPFILES:=$(addprefix $(BUILDDIR)/, $(DEPFILES))
 DEPFILES:=$(patsubst ./,,$(DEPFILES))
 
-BINARY=$(BUILDDIR)/gen_json.out
+BINARY=$(BUILDDIR)/gen_json
 
-CXXFLAGS= $(OPT) $(DEPFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
+# binary process
+SRCDIRS2=process shared
+
+CPPFILES2:=$(foreach dir, $(SRCDIRS2), $(wildcard $(dir)/*.cpp))
+
+OBJFILES2:=$(patsubst %.cpp, %.o, $(CPPFILES2))
+OBJFILES2:=$(addprefix $(BUILDDIR)/, $(OBJFILES2))
+OBJFILES2:=$(patsubst ./,,$(OBJFILES2))
+
+DEPFILES2:=$(patsubst %.cpp, %.d, $(CPPFILES2))
+DEPFILES2:=$(addprefix $(BUILDDIR)/, $(DEPFILES2))
+DEPFILES2:=$(patsubst ./,,$(DEPFILES2))
+
+BINARY2=$(BUILDDIR)/process_json
 
 # targets
 
-all: $(BINARY)
+all: $(BINARY) $(BINARY2)
 
 $(BINARY) : $(OBJFILES)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(BINARY2) : $(OBJFILES2)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
@@ -38,4 +58,7 @@ clean:
 	rm -f $(BINARY)
 	rm -f $(DEPFILES)
 	rm -f $(OBJFILES)
+	rm -f $(BINARY2)
+	rm -f $(DEPFILES2)
+	rm -f $(OBJFILES2)
 	rm -f compile_commands.json
