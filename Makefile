@@ -1,23 +1,26 @@
-# build command for individual files
-# build command to build the bin
-# create dependencies using gcc
-# find files automatically by a wildcard
-# create object files and dep files by substituting c files
-#
 CXX=g++
 OPT=-O0
 DEPFLAGS=-MP -MD
-CXXFLAGS= $(OPT) $(DEPFLAGS) -g 
 
-BUILDDIR=./output
-BINARY=$(BUILDDIR)/gen_json.out
-
-
-SRCDIRS=. src
+BUILDDIR=./build
+SRCDIRS=. shared
+INCLUDEDIRS=. include
 
 CPPFILES:=$(foreach dir, $(SRCDIRS), $(wildcard $(dir)/*.cpp))
-OBJFILES:=$(addprefix output/, $(addsuffix .o, $(basename $(notdir $(CPPFILES)))))
-DEPFILES:=$(addprefix output/, $(addsuffix .d, $(basename $(notdir $(CPPFILES)))))
+
+OBJFILES:=$(patsubst %.cpp, %.o, $(CPPFILES))
+OBJFILES:=$(addprefix $(BUILDDIR)/, $(OBJFILES))
+OBJFILES:=$(patsubst ./,,$(OBJFILES))
+
+DEPFILES:=$(patsubst %.cpp, %.d, $(CPPFILES))
+DEPFILES:=$(addprefix $(BUILDDIR)/, $(DEPFILES))
+DEPFILES:=$(patsubst ./,,$(DEPFILES))
+
+BINARY=$(BUILDDIR)/gen_json.out
+
+CXXFLAGS= $(OPT) $(DEPFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
+
+# targets
 
 all: $(BINARY)
 
@@ -25,10 +28,14 @@ $(BINARY) : $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
+	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 -include $(DEPFILES)
 
 .PHONY : clean
 clean: 
-	rm $(BINARY)
+	rm -f $(BINARY)
+	rm -f $(DEPFILES)
+	rm -f $(OBJFILES)
+	rm -f compile_commands.json
