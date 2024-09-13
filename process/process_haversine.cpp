@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/types.h"
+#include "types.h"
 
 static u8*
 read_file (u8 *file_name, s32 *size)
