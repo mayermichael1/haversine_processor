@@ -36,9 +36,81 @@ main (s32 argc, u8 **argv)
   
   json_memory = read_file(json_file_name, &json_size);
 
-  if (json_size > 10)
+  for (s32 cursor = 0; cursor < json_size; cursor++)
     {
-      printf("%c \n", json_memory[(json_size-2)]);
-    } 
+      u8 character = *(json_memory+cursor);
+
+      switch (character)
+        {
+          case ' ':
+          case '\n':
+          case '\r':
+          case '\t':
+            {
+              continue;
+              break;
+            }
+          case '{':
+            {
+              printf("Begin Object\n");
+              break;
+            }
+          case '}':
+            {
+              printf("End Object\n");
+              break;
+            }
+          case '[':
+            {
+              printf("Begin Array\n");
+              break;
+            }
+          case ']':
+            {
+              printf("End Array\n");
+              break;
+            }
+          case '"':
+            {
+              printf("String follows\n");
+              break;
+            }
+          case 'n':
+            {
+              printf("null follows\n");
+              break;
+            }
+          case 't':
+            {
+              printf("true follows\n");
+              break;
+            }
+          case 'f':
+            {
+              printf("false follows\n");
+              break;
+            }
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9':
+            {
+              printf("number follow\n");
+              break;
+            }
+          default:
+            continue;
+        }
+
+      // possible json beginnings
+      // {
+      // [
+    }
   return 0;
 }
