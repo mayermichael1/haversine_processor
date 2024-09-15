@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "types.h"
+#include "calc.h"
 
 static u8*
 read_file (u8 *file_name, s32 *size)
@@ -41,6 +42,11 @@ main (s32 argc, u8 **argv)
   s32 current_word_index = 0;
   u8 current_word[256] = "";
 
+  u8 last_identifier[256] = "";
+  coordinate coords[2] = {};
+  s32 haversine_calc_ammount = 0;
+  f64 haversine_sum = 0;
+
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -64,23 +70,25 @@ main (s32 argc, u8 **argv)
               current_word_index--;
               current_word[current_word_index] = 0;
 
+#if 0
               if (strncmp(current_word, "null", 4) == 0)
                 {
-                  printf ("null read\n");
+                  //
                 }
               else if (strncmp(current_word, "true", 4) == 0)
                 {
-                  printf ("true read\n");
+                  //
                 }
               else if (strncmp(current_word, "false", 5) == 0)
                 {
-                  printf ("false read\n");
+                  // 
                 }
-              else if (current_word[0] == '"' &&
+#endif
+              if (current_word[0] == '"' &&
                        current_word[current_word_index - 1] == '"')
                 {
                   current_word[current_word_index - 1] = 0;
-                  printf("identifier: %s \n", &current_word[1]);
+                  strcpy(last_identifier, &current_word[1]);
                 }
               else 
                 {
@@ -89,7 +97,30 @@ main (s32 argc, u8 **argv)
                   if (endptr != NULL &&
                       endptr != current_word)
                     {
-                      printf("value: %f \n", value);
+                      if (strncmp(last_identifier, "x0", 2) == 0)
+                        {
+                          coords[0].longitude = value;
+                        }
+                      else if (strncmp(last_identifier, "x1", 2) == 0)
+                        {
+                          coords[1].longitude = value;
+                        }
+                      else if (strncmp(last_identifier, "y0", 2) == 0)
+                        {
+                          coords[0].latitude = value;
+                        }
+                      else if (strncmp(last_identifier, "y1", 2) == 0)
+                        {
+                          coords[1].latitude = value;
+                          haversine_sum += reference_haversine(
+                            coords[0],
+                            coords[1],
+                            EARTH_RADIUS
+                          );
+                          haversine_calc_ammount++;
+                          coords[0] = {0.0, 0.0};
+                          coords[1] = {0.0, 0.0};
+                        }
                     }
                 }
 
@@ -98,5 +129,7 @@ main (s32 argc, u8 **argv)
             }
         }
     }
+
+    printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
   return 0;
 }
