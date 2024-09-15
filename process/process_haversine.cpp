@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "types.h"
 
@@ -36,9 +37,16 @@ main (s32 argc, u8 **argv)
   
   json_memory = read_file(json_file_name, &json_size);
 
-  for (s32 cursor = 0; cursor < json_size; cursor++)
+  s32 cursor = 0;
+  s32 current_word_index = 0;
+  u8 current_word[256] = "";
+
+  while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
+      cursor++;
+      current_word[current_word_index] = character;
+      current_word_index++;
 
       switch (character)
         {
@@ -46,71 +54,48 @@ main (s32 argc, u8 **argv)
           case '\n':
           case '\r':
           case '\t':
-            {
-              continue;
-              break;
-            }
+          case ',':
           case '{':
-            {
-              printf("Begin Object\n");
-              break;
-            }
           case '}':
-            {
-              printf("End Object\n");
-              break;
-            }
           case '[':
-            {
-              printf("Begin Array\n");
-              break;
-            }
           case ']':
+          case ':':
             {
-              printf("End Array\n");
-              break;
-            }
-          case '"':
-            {
-              printf("String follows\n");
-              break;
-            }
-          case 'n':
-            {
-              printf("null follows\n");
-              break;
-            }
-          case 't':
-            {
-              printf("true follows\n");
-              break;
-            }
-          case 'f':
-            {
-              printf("false follows\n");
-              break;
-            }
-          case '0':
-          case '1':
-          case '2':
-          case '3':
-          case '4':
-          case '5':
-          case '6':
-          case '7':
-          case '8':
-          case '9':
-            {
-              printf("number follow\n");
-              break;
-            }
-          default:
-            continue;
-        }
+              current_word_index--;
+              current_word[current_word_index] = 0;
 
-      // possible json beginnings
-      // {
-      // [
+              if (strncmp(current_word, "null", 4) == 0)
+                {
+                  printf ("null read\n");
+                }
+              else if (strncmp(current_word, "true", 4) == 0)
+                {
+                  printf ("true read\n");
+                }
+              else if (strncmp(current_word, "false", 5) == 0)
+                {
+                  printf ("false read\n");
+                }
+              else if (current_word[0] == '"' &&
+                       current_word[current_word_index - 1] == '"')
+                {
+                  current_word[current_word_index - 1] = 0;
+                  printf("identifier: %s \n", &current_word[1]);
+                }
+              else 
+                {
+                  u8* endptr;
+                  f64 value = strtof(current_word, &endptr); 
+                  if (endptr != NULL || endptr == current_word)
+                    {
+                      printf("value: %f \n", value);
+                    }
+                }
+
+              current_word_index = 0;
+              break;
+            }
+        }
     }
   return 0;
 }
