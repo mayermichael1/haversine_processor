@@ -85,8 +85,9 @@ main (s32 argc, u8 **argv)
               else 
                 {
                   u8* endptr;
-                  f64 value = strtof(current_word, &endptr); 
-                  if (endptr != NULL || endptr == current_word)
+                  f64 value = strtod(current_word, &endptr); 
+                  if (endptr != NULL &&
+                      endptr != current_word)
                     {
                       printf("value: %f \n", value);
                     }
