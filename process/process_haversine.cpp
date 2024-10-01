@@ -69,7 +69,7 @@ main (s32 argc, u8 **argv)
   s32 haversine_calc_ammount = 0;
   f64 haversine_sum = 0;
 
-  estimate_cpu_frequencies();
+  //estimate_cpu_frequencies();
 
   if (argc >= 2)
     {
