@@ -4,7 +4,7 @@
 
 #include "types.h"
 #include "calc.h"
-#include "metric.h"
+#include "profiler.h"
 
 static u8*
 read_file (u8 *file_name, s32 *size)
@@ -68,6 +68,8 @@ main (s32 argc, u8 **argv)
   coordinate coords[2] = {};
   s32 haversine_calc_ammount = 0;
   f64 haversine_sum = 0;
+
+  estimate_cpu_frequencies();
 
   if (argc >= 2)
     {

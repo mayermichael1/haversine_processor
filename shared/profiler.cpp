@@ -1,4 +1,4 @@
-#include "metric.h"
+#include "profiler.h"
 #include <stdio.h>
 
 u64
