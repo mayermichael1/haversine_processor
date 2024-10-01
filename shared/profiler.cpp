@@ -54,3 +54,19 @@ estimate_cpu_frequencies (u64 milliseconds_to_query)
   u64 estimated_cpu_frequency = cpu_elapsed / seconds_run;
   return estimated_cpu_frequency;
 }
+
+profiler_data profiler = {0};
+
+timed_block::timed_block(const char *title)
+{
+  data.title = title;
+  data.start_time = get_cpu_time();
+}
+
+timed_block::~timed_block()
+{
+  data.end_time = get_cpu_time();
+  data.elapsed = data.end_time - data.start_time;
+  profiler.events[profiler.event_count] = data;
+  profiler.event_count++;
+}

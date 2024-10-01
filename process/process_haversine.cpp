@@ -50,6 +50,10 @@ str_contains_any(u8* str, u8* characters)
 s32
 main (s32 argc, u8 **argv)
 {
+  {
+    TIMED_BLOCK("main");
+    TIMED_BLOCK("main2");
+
   u64 timer_start = get_cpu_time();
   u64 timer_elapsed = 0;
   u64 read_elapsed = 0;
@@ -183,5 +187,13 @@ main (s32 argc, u8 **argv)
   printf("parse:   %15lu \t %.2f \n", parser_elapsed, (f64)parser_elapsed / (f64)timer_elapsed);
   printf("calc:    %15lu \t %.2f\n", calc_elapsed, (f64)calc_elapsed / (f64)timer_elapsed);
   printf("program: %15lu \t 1.00\n", timer_elapsed);
+
+  } // this is needed for the profiler
+
+  for (int i = 0; i < profiler.event_count; i++)
+    {
+      printf("Profile Event: %s\t%15lu\n", profiler.events[i].title, profiler.events[i].elapsed);
+    }
+
   return 0;
 }
