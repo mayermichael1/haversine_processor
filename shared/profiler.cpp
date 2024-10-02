@@ -69,4 +69,8 @@ timed_block::~timed_block()
   data.elapsed = data.end_time - data.start_time;
   profiler.events[profiler.event_count] = data;
   profiler.event_count++;
+  if (profiler.event_count >= MAX_EVENT_COUNT)
+    {
+      profiler.event_count = 0;
+    }
 }

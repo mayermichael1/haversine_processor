@@ -50,15 +50,7 @@ str_contains_any(u8* str, u8* characters)
 s32
 main (s32 argc, u8 **argv)
 {
-  {
-    TIMED_BLOCK("main");
-    TIMED_BLOCK("main2");
-
-  u64 timer_start = get_cpu_time();
-  u64 timer_elapsed = 0;
-  u64 read_elapsed = 0;
-  u64 parser_elapsed = 0;
-  u64 calc_elapsed = 0;
+  TIMED_BLOCK("main");
 
   u8 *json_file_name = NULL;
   s32 json_size = 0;
@@ -80,12 +72,11 @@ main (s32 argc, u8 **argv)
       json_file_name = argv[1];
     }
   
-  u64 read_start = get_cpu_time();
+  TIMED_BLOCK("read");
   json_memory = read_file(json_file_name, &json_size);
-  u64 read_end = get_cpu_time();
-  read_elapsed = read_end - read_start;
+  TIMED_BLOCK_END("read");
 
-  u64 parse_start = get_cpu_time();
+  TIMED_BLOCK("parse");
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -154,7 +145,6 @@ main (s32 argc, u8 **argv)
                     }
                   else if (strncmp(last_identifier, "y1", 2) == 0)
                     {
-                      u64 calc_start = get_cpu_time();
                       coords[1].latitude = value;
                       haversine_sum += reference_haversine(
                         coords[0],
@@ -164,8 +154,6 @@ main (s32 argc, u8 **argv)
                       haversine_calc_ammount++;
                       coords[0] = {0.0, 0.0};
                       coords[1] = {0.0, 0.0};
-                      u64 calc_end = get_cpu_time();
-                      calc_elapsed += (calc_end - calc_start);
                     }
                 }
             }
@@ -174,21 +162,11 @@ main (s32 argc, u8 **argv)
           break;
         }
     }
-  u64 parse_end = get_cpu_time(); 
-  parser_elapsed = (parse_end - parse_start) - calc_elapsed;
+  TIMED_BLOCK_END("parse");
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 
-  u64 timer_end = get_cpu_time();
-  timer_elapsed = timer_end - timer_start;
-
-  printf("Profiling: \n");
-  printf("read:    %15lu \t %.2f\n", read_elapsed, (f64)read_elapsed / (f64)timer_elapsed);
-  printf("parse:   %15lu \t %.2f \n", parser_elapsed, (f64)parser_elapsed / (f64)timer_elapsed);
-  printf("calc:    %15lu \t %.2f\n", calc_elapsed, (f64)calc_elapsed / (f64)timer_elapsed);
-  printf("program: %15lu \t 1.00\n", timer_elapsed);
-
-  } // this is needed for the profiler
+  TIMED_BLOCK_END("main");
 
   for (int i = 0; i < profiler.event_count; i++)
     {
