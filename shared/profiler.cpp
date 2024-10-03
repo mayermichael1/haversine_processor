@@ -1,5 +1,6 @@
 #include "profiler.h"
 #include <stdio.h>
+#include <string.h>
 
 u64
 get_os_timer_frequency ()
@@ -57,20 +58,108 @@ estimate_cpu_frequencies (u64 milliseconds_to_query)
 
 profiler_data profiler = {0};
 
-timed_block::timed_block(const char *title)
+timed_block::timed_block(char *title)
 {
   data.title = title;
   data.start_time = get_cpu_time();
+}
+
+inline b8
+events_spot_filled (u16 index)
+{
+  return profiler.events[index].title != 0 &&
+         strlen(profiler.events[index].title) > 0;
+}
+
+static u16
+calc_event_hash (char *title)
+{
+  u16 hashkey = 0;
+  for (u8 *character = title; *character != 0; character++)
+    {
+      hashkey += *character;
+    }
+  hashkey = hashkey % MAX_EVENT_COUNT;
+  return hashkey;
+}
+
+s16
+find_key (char *title)
+{
+  s16 found_key = -1;
+  u16 current_key = calc_event_hash(title);
+  u16 hash_key = current_key;
+
+  do
+  {
+    if (events_spot_filled(current_key) &&
+        strcmp(profiler.events[current_key].title, title) == 0)
+      {
+        found_key = current_key; 
+        break;
+      }
+    else
+      {
+        current_key++;
+        if (current_key >= MAX_EVENT_COUNT)
+          {
+            current_key = 0;
+          }
+      }
+  } 
+  while(hash_key != current_key);
+  
+  return found_key;
+}
+
+static s16
+find_next_free (char *title)
+{  
+  s16 found_key = -1;
+  u16 current_key = calc_event_hash(title);
+  u16 hash_key = current_key;
+
+  do
+  {
+    if (!events_spot_filled(current_key))
+      {
+        found_key = current_key; 
+        break;
+      }
+    else if (strcmp(profiler.events[current_key].title, title) == 0)
+      {
+        break;
+      }
+    else
+      {
+        current_key++;
+        if (current_key >= MAX_EVENT_COUNT)
+          {
+            current_key = 0;
+          }
+      }
+  } 
+  while(hash_key != current_key);
+  
+  return found_key;
 }
 
 timed_block::~timed_block()
 {
   data.end_time = get_cpu_time();
   data.elapsed = data.end_time - data.start_time;
-  profiler.events[profiler.event_count] = data;
-  profiler.event_count++;
-  if (profiler.event_count >= MAX_EVENT_COUNT)
+
+  s16 exists_key = find_key(data.title);
+  if (exists_key >= 0)
     {
-      profiler.event_count = 0;
+      profiler.events[exists_key].elapsed += data.elapsed;
+    }
+  else
+    {
+      s16 key = find_next_free(data.title);
+      if (key >= 0)
+        {
+          profiler.events[key] = data;
+        }
     }
 }

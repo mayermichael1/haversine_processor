@@ -76,7 +76,7 @@ main (s32 argc, u8 **argv)
   json_memory = read_file(json_file_name, &json_size);
   TIMED_BLOCK_END("read");
 
-  TIMED_BLOCK("parse");
+  TIMED_BLOCK("daer");
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -168,10 +168,20 @@ main (s32 argc, u8 **argv)
 
   TIMED_BLOCK_END("main");
 
-  for (int i = 0; i < profiler.event_count; i++)
+  for (int i = 0; i < MAX_EVENT_COUNT; i++)
     {
-      printf("Profile Event: %s\t%15lu\n", profiler.events[i].title, profiler.events[i].elapsed);
+      if (profiler.events[i].title != 0 && strlen(profiler.events[i].title) != 0)
+        {
+          printf("Profile Event[%i]: %s\t%15lu\n", i, profiler.events[i].title, profiler.events[i].elapsed);
+        }
     }
+
+  s16 key = find_key("main");
+  if (key >= 0)
+    {
+      printf("main: \t%15lu\n",profiler.events[key].elapsed);
+    }
+
 
   return 0;
 }

@@ -21,7 +21,7 @@ estimate_cpu_frequencies (u64 milliseconds_to_query = 1000);
 struct 
 event_data
 {
-  const char* title;
+  u8* title;
   u64 start_time;
   u64 end_time;
   u64 elapsed;
@@ -30,7 +30,7 @@ event_data
 struct 
 timed_block
 {
-  timed_block(const char* title);
+  timed_block(u8* title);
   ~timed_block();
   event_data data;
 };
@@ -40,14 +40,19 @@ timed_block
 #define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED_(__COUNTER__, arg)
 #define TIMED_BLOCK_END(arg) }
 
-#define MAX_EVENT_COUNT 1024
+#define MAX_EVENT_COUNT 5
 
 struct
 profiler_data
 {
   event_data events[MAX_EVENT_COUNT];
-  u64 event_count;
 };
+
+s16
+find_key (char *title);
+
+inline b8
+events_spot_filled (u16 index);
 
 extern profiler_data profiler;
 
