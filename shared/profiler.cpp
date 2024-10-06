@@ -80,7 +80,16 @@ calc_event_hash (char *title)
   return hashkey;
 }
 
-s16
+static inline void
+wrap_profiler_event_counter(u16 *counter)
+{
+  if (*counter >= MAX_EVENT_COUNT)
+    {
+      *counter = 0;
+    }
+}
+
+static s16
 find_key (char *title)
 {
   s16 found_key = -1;
@@ -98,10 +107,7 @@ find_key (char *title)
     else
       {
         current_key++;
-        if (current_key >= MAX_EVENT_COUNT)
-          {
-            current_key = 0;
-          }
+        wrap_profiler_event_counter(&current_key);
       }
   } 
   while(hash_key != current_key);
@@ -130,10 +136,7 @@ find_next_free (char *title)
     else
       {
         current_key++;
-        if (current_key >= MAX_EVENT_COUNT)
-          {
-            current_key = 0;
-          }
+        wrap_profiler_event_counter(&current_key);
       }
   } 
   while(hash_key != current_key);
