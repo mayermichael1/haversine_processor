@@ -43,6 +43,13 @@ timed_block
 //#define TIMED_FUNCTION_(name) TIMED_BLOCK(name);
 #define TIMED_FUNCTION() TIMED_BLOCK_COUNTED(__COUNTER__,__FUNCTION__);
 
+///
+///   PROFILER
+///
+
+//NOTE: this profiler accumulates events of the same name.
+//      start and end time are of the last accumulated event.
+//      elapsed time of the event is summed.
 #define MAX_EVENT_COUNT 1024
 
 struct
