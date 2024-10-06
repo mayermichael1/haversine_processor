@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+profiler_data profiler = {0};
+
 u64
 get_os_timer_frequency ()
 {
@@ -56,14 +58,6 @@ estimate_cpu_frequencies (u64 milliseconds_to_query)
   return estimated_cpu_frequency;
 }
 
-profiler_data profiler = {0};
-
-timed_block::timed_block(char *title)
-{
-  data.title = title;
-  data.start_time = get_cpu_time();
-}
-
 inline b8
 events_spot_filled (u16 index)
 {
@@ -75,9 +69,12 @@ static u16
 calc_event_hash (char *title)
 {
   u16 hashkey = 0;
-  for (u8 *character = title; *character != 0; character++)
+  if (title != 0)
     {
-      hashkey += *character;
+      for (u8 *character = title; *character != 0; character++)
+        {
+          hashkey += *character;
+        }
     }
   hashkey = hashkey % MAX_EVENT_COUNT;
   return hashkey;
@@ -144,11 +141,9 @@ find_next_free (char *title)
   return found_key;
 }
 
-timed_block::~timed_block()
+void
+profiler_insert_event (event_data data)
 {
-  data.end_time = get_cpu_time();
-  data.elapsed = data.end_time - data.start_time;
-
   s16 exists_key = find_key(data.title);
   if (exists_key >= 0)
     {
@@ -162,4 +157,59 @@ timed_block::~timed_block()
           profiler.events[key] = data;
         }
     }
+}
+
+event_data 
+profiler_get_event (char *title)
+{
+  event_data data = {};
+  s16 key = find_key(title);
+  if (key >= 0)
+    {
+      data = profiler.events[key]; 
+    } 
+  return data;
+}
+
+event_data 
+profiler_iterate (event_data last_found_event)
+{
+  s16 key = 0;
+  event_data data = {};
+
+  if (last_found_event.title != 0)
+    {
+      key = find_key(last_found_event.title);
+      if (key >= 0)
+        {
+          key++;
+        }
+    }
+
+  if (key >= 0)
+    {
+      for (int i = key; i < MAX_EVENT_COUNT; i++)
+        {
+          if (events_spot_filled(i))
+            {
+              data = profiler.events[i];
+              break;
+            }
+        }
+    } 
+  return data;
+}
+
+timed_block::timed_block(char *title)
+{
+  data.title = title;
+  data.start_time = get_cpu_time();
+}
+
+timed_block::~timed_block()
+{
+  data.end_time = get_cpu_time();
+  data.elapsed = data.end_time - data.start_time;
+
+  profiler_insert_event(data);
 }

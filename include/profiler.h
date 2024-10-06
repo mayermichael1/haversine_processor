@@ -35,12 +35,12 @@ timed_block
   event_data data;
 };
 
-#define TIMED_BLOCK_COUNTED__(number, arg) timed_block profiler_event_##number(arg) 
+#define TIMED_BLOCK_COUNTED__(number, arg) timed_block profiler_event_##number((char*)arg) 
 #define TIMED_BLOCK_COUNTED_(number, arg) TIMED_BLOCK_COUNTED__(number, arg) 
 #define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED_(__COUNTER__, arg)
 #define TIMED_BLOCK_END(arg) }
 
-#define MAX_EVENT_COUNT 5
+#define MAX_EVENT_COUNT 1024
 
 struct
 profiler_data
@@ -48,11 +48,14 @@ profiler_data
   event_data events[MAX_EVENT_COUNT];
 };
 
-s16
-find_key (char *title);
+void
+profiler_insert_event (event_data data);
 
-inline b8
-events_spot_filled (u16 index);
+event_data 
+profiler_get_event (char *title);
+
+event_data 
+profiler_iterate (event_data last_found_event);
 
 extern profiler_data profiler;
 

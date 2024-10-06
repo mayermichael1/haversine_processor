@@ -168,20 +168,16 @@ main (s32 argc, u8 **argv)
 
   TIMED_BLOCK_END("main");
 
-  for (int i = 0; i < MAX_EVENT_COUNT; i++)
+  event_data data = {};
+  do
     {
-      if (profiler.events[i].title != 0 && strlen(profiler.events[i].title) != 0)
-        {
-          printf("Profile Event[%i]: %s\t%15lu\n", i, profiler.events[i].title, profiler.events[i].elapsed);
-        }
-    }
+      data = profiler_iterate(data); 
+      printf("Profile Event %s:\t%15lu\n", data.title, data.elapsed);
+    } 
+  while(data.title);
 
-  s16 key = find_key("main");
-  if (key >= 0)
-    {
-      printf("main: \t%15lu\n",profiler.events[key].elapsed);
-    }
-
+  event_data main_data = profiler_get_event((char*)"main");
+  printf("main: \t%15lu\n",main_data.elapsed);
 
   return 0;
 }
