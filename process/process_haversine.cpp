@@ -169,12 +169,10 @@ main (s32 argc, u8 **argv)
   TIMED_BLOCK_END("main");
 
   event_data data = {};
-  do
+  while(profiler_iterate(&data))
     {
-      data = profiler_iterate(data); 
       printf("Profile Event %s:\t%15lu\n", data.title, data.elapsed);
     } 
-  while(data.title);
 
   event_data main_data = profiler_get_event((char*)"main");
   printf("main: \t%15lu\n",main_data.elapsed);

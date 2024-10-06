@@ -54,8 +54,8 @@ profiler_insert_event (event_data data);
 event_data 
 profiler_get_event (char *title);
 
-event_data 
-profiler_iterate (event_data last_found_event);
+b8 
+profiler_iterate (event_data *event);
 
 extern profiler_data profiler;
 

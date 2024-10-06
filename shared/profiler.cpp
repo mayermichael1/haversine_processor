@@ -171,15 +171,15 @@ profiler_get_event (char *title)
   return data;
 }
 
-event_data 
-profiler_iterate (event_data last_found_event)
+b8 
+profiler_iterate (event_data *event)
 {
+  b8 next_found = false;
   s16 key = 0;
-  event_data data = {};
 
-  if (last_found_event.title != 0)
+  if (event->title != 0)
     {
-      key = find_key(last_found_event.title);
+      key = find_key(event->title);
       if (key >= 0)
         {
           key++;
@@ -192,12 +192,13 @@ profiler_iterate (event_data last_found_event)
         {
           if (events_spot_filled(i))
             {
-              data = profiler.events[i];
+              *event = profiler.events[i];
+              next_found = true;
               break;
             }
         }
     } 
-  return data;
+  return next_found;
 }
 
 timed_block::timed_block(char *title)
