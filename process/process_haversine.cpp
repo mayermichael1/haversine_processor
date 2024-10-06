@@ -9,6 +9,7 @@
 static u8*
 read_file (u8 *file_name, s32 *size)
 {
+  TIMED_FUNCTION();
   FILE *fp = fopen(file_name, "rb");
   u8 *memory = NULL;
 

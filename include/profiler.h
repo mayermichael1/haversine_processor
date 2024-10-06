@@ -35,10 +35,13 @@ timed_block
   event_data data;
 };
 
-#define TIMED_BLOCK_COUNTED__(number, arg) timed_block profiler_event_##number((char*)arg) 
-#define TIMED_BLOCK_COUNTED_(number, arg) TIMED_BLOCK_COUNTED__(number, arg) 
-#define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED_(__COUNTER__, arg)
+#define TIMED_BLOCK_COUNTED_(number, arg) timed_block profiler_event_##number((char*)arg) 
+#define TIMED_BLOCK_COUNTED(number, arg) TIMED_BLOCK_COUNTED_(number, arg) 
+#define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED(__COUNTER__, arg)
 #define TIMED_BLOCK_END(arg) }
+
+//#define TIMED_FUNCTION_(name) TIMED_BLOCK(name);
+#define TIMED_FUNCTION() TIMED_BLOCK_COUNTED(__COUNTER__,__FUNCTION__);
 
 #define MAX_EVENT_COUNT 1024
 
