@@ -80,7 +80,7 @@ main (s32 argc, u8 **argv)
   
   json_memory = read_file(json_file_name, &json_size);
 
-  TIMED_BLOCK("parse");
+  TIMED_BANDWITH("parse", json_size);
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -150,11 +150,13 @@ main (s32 argc, u8 **argv)
                   else if (strncmp(last_identifier, "y1", 2) == 0)
                     {
                       coords[1].latitude = value;
+                      TIMED_BANDWITH("calc", 4 * sizeof(f64));
                       haversine_sum += reference_haversine(
                         coords[0],
                         coords[1],
                         EARTH_RADIUS
                       );
+                      TIMED_BANDWITH_END("calc");
                       haversine_calc_ammount++;
                       coords[0] = {0.0, 0.0};
                       coords[1] = {0.0, 0.0};
@@ -166,7 +168,7 @@ main (s32 argc, u8 **argv)
           break;
         }
     }
-  TIMED_BLOCK_END("parse");
+  TIMED_BANDWITH_END("parse");
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 

@@ -151,6 +151,7 @@ profiler_insert_event (event_data data)
   if (exists_key >= 0)
     {
       profiler.events[exists_key].elapsed += data.elapsed;
+      profiler.events[exists_key].bytes_processed += data.bytes_processed;
     }
   else
     {
