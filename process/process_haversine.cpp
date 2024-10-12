@@ -80,7 +80,7 @@ main (s32 argc, u8 **argv)
   
   json_memory = read_file(json_file_name, &json_size);
 
-  TIMED_BANDWITH("parse", json_size);
+  TIMED_BLOCK("parse");
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -168,7 +168,7 @@ main (s32 argc, u8 **argv)
           break;
         }
     }
-  TIMED_BANDWITH_END("parse");
+  TIMED_BLOCK_END("parse");
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 
