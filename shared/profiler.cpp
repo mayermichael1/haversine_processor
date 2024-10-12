@@ -238,7 +238,7 @@ print_profiler()
         {
           f64 mb_processed = data.bytes_processed / 1024.f / 1024.f;
           f64 gb_processed_per_second = (mb_processed / 1024.f) / elapsed_seconds;
-          printf("\tmb: %5.5f\tgb/s: %5.5f", mb_processed, gb_processed_per_second);
+          printf("\tmb: %9.5f\tgb/s: %9.5f", mb_processed, gb_processed_per_second);
         }
 
       printf("\n");
