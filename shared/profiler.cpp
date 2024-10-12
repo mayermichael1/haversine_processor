@@ -204,10 +204,12 @@ profiler_iterate (event_data *event)
   return next_found;
 }
 
-timed_block::timed_block(char *title)
+timed_block::timed_block(char *title, u64 bytes_processed)
 {
+  data = {};
   data.title = title;
   data.start_time = get_cpu_time();
+  data.bytes_processed += bytes_processed;
 }
 
 timed_block::~timed_block()
@@ -216,4 +218,29 @@ timed_block::~timed_block()
   data.elapsed = data.end_time - data.start_time;
 
   profiler_insert_event(data);
+}
+
+void 
+print_profiler()
+{
+#ifdef DEBUG
+  u64 cpu_frequency = estimate_cpu_frequencies();
+
+  event_data data = {};
+
+  while(profiler_iterate(&data))
+    {
+      f64 elapsed_seconds = (f64)data.elapsed / (f64)cpu_frequency;
+      printf("%s:\t%5.5f \t%15lu", data.title, elapsed_seconds, data.elapsed);
+
+      if (data.bytes_processed > 0) 
+        {
+          f64 mb_processed = data.bytes_processed / 1024.f / 1024.f;
+          f64 gb_processed_per_second = (mb_processed / 1024.f) / elapsed_seconds;
+          printf("\tmb: %5.5f\tgb/s: %5.5f", mb_processed, gb_processed_per_second);
+        }
+
+      printf("\n");
+    } 
+#endif
 }

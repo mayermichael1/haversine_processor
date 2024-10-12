@@ -9,7 +9,6 @@
 static u8*
 read_file (u8 *file_name, s32 *size)
 {
-  TIMED_FUNCTION();
   FILE *fp = fopen(file_name, "rb");
   u8 *memory = NULL;
 
@@ -18,8 +17,14 @@ read_file (u8 *file_name, s32 *size)
       fseek(fp, 0, SEEK_END);
       *size = ftell(fp); 
       rewind(fp);
+
+      TIMED_BANDWITH("read", *size);
+
       memory = (u8*)malloc(*size);
       fread(memory, sizeof(u8), *size, fp);
+
+      TIMED_BANDWITH_END("read");
+
       fclose(fp);
     }
 
@@ -73,11 +78,9 @@ main (s32 argc, u8 **argv)
       json_file_name = argv[1];
     }
   
-  TIMED_BLOCK("read");
   json_memory = read_file(json_file_name, &json_size);
-  TIMED_BLOCK_END("read");
 
-  TIMED_BLOCK("daer");
+  TIMED_BLOCK("parse");
   while (cursor < json_size)
     {
       u8 character = *(json_memory+cursor);
@@ -168,12 +171,6 @@ main (s32 argc, u8 **argv)
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 
   TIMED_BLOCK_END("main");
-
-  event_data data = {};
-  while(profiler_iterate(&data))
-    {
-      printf("Profile Event %s:\t%15lu\n", data.title, data.elapsed);
-    } 
-
+  print_profiler();
   return 0;
 }

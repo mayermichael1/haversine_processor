@@ -26,12 +26,13 @@ event_data
   u64 start_time;
   u64 end_time;
   u64 elapsed;
+  u64 bytes_processed;
 };
 
 struct 
 timed_block
 {
-  timed_block(u8* title);
+  timed_block(u8* title, u64 bytes_processed);
   ~timed_block();
   event_data data;
 };
@@ -62,21 +63,30 @@ profiler_get_event (char *title);
 b8 
 profiler_iterate (event_data *event);
 
+void
+print_profiler();
+
 #ifdef DEBUG
 
-#define TIMED_BLOCK_COUNTED_(number, arg) timed_block profiler_event_##number((char*)arg) 
-#define TIMED_BLOCK_COUNTED(number, arg) TIMED_BLOCK_COUNTED_(number, arg) 
-#define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED(__COUNTER__, arg)
+#define TIMED_BANDWITH_COUNTED_(number, title, bytes) timed_block profiler_event_##number((char*)title, bytes) 
+#define TIMED_BANDWITH_COUNTED(number, title, bytes) TIMED_BANDWITH_COUNTED_(number, title, bytes) 
+
+#define TIMED_BANDWITH(title, bytes) { TIMED_BANDWITH_COUNTED(__COUNTER__, title, bytes)
+#define TIMED_BANDWITH_END(title) }
+
+#define TIMED_BLOCK(arg) { TIMED_BANDWITH_COUNTED(__COUNTER__, arg, 0)
 #define TIMED_BLOCK_END(arg) }
 
 //#define TIMED_FUNCTION_(name) TIMED_BLOCK(name);
-#define TIMED_FUNCTION() TIMED_BLOCK_COUNTED(__COUNTER__,__FUNCTION__);
+#define TIMED_FUNCTION() TIMED_BANDWITH_COUNTED(__COUNTER__,__FUNCTION__, 0);
 
 #else //DEBUG
 
 #define TIMED_BLOCK(arg)
 #define TIMED_BLOCK_END(arg)
 #define TIMED_FUNCTION()
+#define TIMED_BANDWITH(title, bytes)
+#define TIMED_BANDWITH_END(title)
 
 #endif //DEBUG
 
