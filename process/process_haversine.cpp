@@ -175,8 +175,5 @@ main (s32 argc, u8 **argv)
       printf("Profile Event %s:\t%15lu\n", data.title, data.elapsed);
     } 
 
-  event_data main_data = profiler_get_event((char*)"main");
-  printf("main: \t%15lu\n",main_data.elapsed);
-
   return 0;
 }

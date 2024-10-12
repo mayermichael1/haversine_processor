@@ -17,6 +17,7 @@ get_cpu_time ();
 u64 
 estimate_cpu_frequencies (u64 milliseconds_to_query = 1000);
 
+#define MAX_EVENT_COUNT 1024
 
 struct 
 event_data
@@ -35,14 +36,6 @@ timed_block
   event_data data;
 };
 
-#define TIMED_BLOCK_COUNTED_(number, arg) timed_block profiler_event_##number((char*)arg) 
-#define TIMED_BLOCK_COUNTED(number, arg) TIMED_BLOCK_COUNTED_(number, arg) 
-#define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED(__COUNTER__, arg)
-#define TIMED_BLOCK_END(arg) }
-
-//#define TIMED_FUNCTION_(name) TIMED_BLOCK(name);
-#define TIMED_FUNCTION() TIMED_BLOCK_COUNTED(__COUNTER__,__FUNCTION__);
-
 ///
 ///   PROFILER
 ///
@@ -50,13 +43,15 @@ timed_block
 //NOTE: this profiler accumulates events of the same name.
 //      start and end time are of the last accumulated event.
 //      elapsed time of the event is summed.
-#define MAX_EVENT_COUNT 1024
+
 
 struct
 profiler_data
 {
   event_data events[MAX_EVENT_COUNT];
 };
+
+extern profiler_data profiler;
 
 void
 profiler_insert_event (event_data data);
@@ -67,6 +62,22 @@ profiler_get_event (char *title);
 b8 
 profiler_iterate (event_data *event);
 
-extern profiler_data profiler;
+#ifdef DEBUG
+
+#define TIMED_BLOCK_COUNTED_(number, arg) timed_block profiler_event_##number((char*)arg) 
+#define TIMED_BLOCK_COUNTED(number, arg) TIMED_BLOCK_COUNTED_(number, arg) 
+#define TIMED_BLOCK(arg) { TIMED_BLOCK_COUNTED(__COUNTER__, arg)
+#define TIMED_BLOCK_END(arg) }
+
+//#define TIMED_FUNCTION_(name) TIMED_BLOCK(name);
+#define TIMED_FUNCTION() TIMED_BLOCK_COUNTED(__COUNTER__,__FUNCTION__);
+
+#else //DEBUG
+
+#define TIMED_BLOCK(arg)
+#define TIMED_BLOCK_END(arg)
+#define TIMED_FUNCTION()
+
+#endif //DEBUG
 
 #endif

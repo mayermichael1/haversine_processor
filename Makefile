@@ -5,7 +5,8 @@ DEPFLAGS=-MP -MD
 INCLUDEDIRS=. include
 BUILDDIR=./build
 
-CXXFLAGS= $(OPT) $(DEPFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
+CUSTOMFLAGS=-D DEBUG
+CXXFLAGS= $(OPT) $(DEPFLAGS) $(CUSTOMFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
 
 # binary gen
 SRCDIRS=gen shared
