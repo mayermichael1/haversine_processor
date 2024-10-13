@@ -6,27 +6,55 @@
 #include "calc.h"
 #include "profiler.h"
 
-static u8*
-read_file (u8 *file_name, s32 *size)
+static s32 
+get_file_size (u8* file_name)
 {
   FILE *fp = fopen(file_name, "rb");
-  u8 *memory = NULL;
+  fseek(fp, 0, SEEK_END);
+  s32 size = ftell(fp); 
+  fclose(fp);
+  return size;
 
-  if (fp)
+}
+static u8*
+read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
+{
+  u64 current_time = get_os_time();
+  u64 run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
+  u64 max_elapsed = 0;
+  u64 min_elapsed = UINT64_MAX;
+  u64 start = 0;
+  u64 end = 0;
+  u64 elapsed = 0;
+  u64 read_bytes = 0;
+
+  while (current_time < run_to_time)
     {
-      fseek(fp, 0, SEEK_END);
-      *size = ftell(fp); 
-      rewind(fp);
+      FILE *fp = fopen(file_name, "rb");
 
-      TIMED_BANDWITH("read", *size);
+      if (fp)
+        {
+          start = get_cpu_time();
+          read_bytes = fread(memory, sizeof(u8), bytes_to_read, fp);
+          end = get_cpu_time();
 
-      memory = (u8*)malloc(*size);
-      fread(memory, sizeof(u8), *size, fp);
+          fclose(fp);
+        }
 
-      TIMED_BANDWITH_END("read");
-
-      fclose(fp);
+      u64 elapsed = end - start;
+      if (elapsed < min_elapsed && bytes_to_read == read_bytes)
+        {
+          min_elapsed = elapsed;
+          run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
+        }
+      if (elapsed > max_elapsed && bytes_to_read == read_bytes)
+        {
+          max_elapsed = elapsed;
+          run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
+        }
+      current_time = get_os_time();
     }
+  printf("min: %lu\tmax: %lu\n", min_elapsed, max_elapsed);
 
   return memory;
 }
@@ -78,7 +106,10 @@ main (s32 argc, u8 **argv)
       json_file_name = argv[1];
     }
   
-  json_memory = read_file(json_file_name, &json_size);
+
+  json_size = get_file_size(json_file_name);
+  json_memory = (u8*)malloc(json_size);
+  read_file(json_file_name, json_size, json_memory);
 
   TIMED_BLOCK("parse");
   while (cursor < json_size)
