@@ -19,42 +19,22 @@ get_file_size (u8* file_name)
 static u8*
 read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
 {
-  u64 current_time = get_os_time();
-  u64 run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
-  u64 max_elapsed = 0;
-  u64 min_elapsed = UINT64_MAX;
-  u64 start = 0;
-  u64 end = 0;
-  u64 elapsed = 0;
-  u64 read_bytes = 0;
+  repetiton_test_data reptest_data = {};
+  REPETITION_TEST_START(reptest_data, 10.f);
 
-  while (current_time < run_to_time)
+  FILE *fp = fopen(file_name, "rb");
+
+  if (fp)
     {
-      FILE *fp = fopen(file_name, "rb");
+      REPETITION_START_TIMER(reptest_data);
+      fread(memory, sizeof(u8), bytes_to_read, fp);
+      REPETITION_END_TIMER(reptest_data);
 
-      if (fp)
-        {
-          start = get_cpu_time();
-          read_bytes = fread(memory, sizeof(u8), bytes_to_read, fp);
-          end = get_cpu_time();
-
-          fclose(fp);
-        }
-
-      u64 elapsed = end - start;
-      if (elapsed < min_elapsed && bytes_to_read == read_bytes)
-        {
-          min_elapsed = elapsed;
-          run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
-        }
-      if (elapsed > max_elapsed && bytes_to_read == read_bytes)
-        {
-          max_elapsed = elapsed;
-          run_to_time = get_os_time() + (get_os_timer_frequency() * 10);
-        }
-      current_time = get_os_time();
+      fclose(fp);
     }
-  printf("min: %lu\tmax: %lu\n", min_elapsed, max_elapsed);
+
+  REPETITION_TEST_END(reptest_data);
+  printf("min: %lu\tmax: %lu\n", reptest_data.min_elapsed, reptest_data.max_elapsed);
 
   return memory;
 }

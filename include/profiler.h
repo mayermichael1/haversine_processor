@@ -90,4 +90,51 @@ print_profiler();
 
 #endif //DEBUG
 
+///
+///   repetition testing
+///
+
+struct repetiton_test_data
+{
+  u64 current_time;
+  u64 run_to_time;
+  f32 seconds_before_quit;
+
+  u64 current_start;
+  u64 current_end;
+  u64 current_elapsed;
+
+  u64 max_elapsed;
+  u64 min_elapsed;
+
+  u64 bytes_processed;
+};
+
+#define REPETITION_TEST_START(data, seconds) \
+  data.current_time = get_os_time(); \
+  data.seconds_before_quit = seconds; \
+  data.run_to_time = data.current_time + ( data.seconds_before_quit * get_os_timer_frequency()); \
+  data.min_elapsed = UINT64_MAX; \
+  while (data.current_time < data.run_to_time) \
+    {
+
+#define REPETITION_START_TIMER(data) data.current_start = get_cpu_time()
+#define REPETITION_END_TIMER(data) data.current_end = get_cpu_time()
+
+#define REPETITION_TEST_END(data) \
+  data.current_elapsed = data.current_end - data.current_start; \
+  if (data.current_elapsed < data.min_elapsed) \
+    { \
+      data.min_elapsed = data.current_elapsed; \
+      data.run_to_time = get_os_time() + (get_os_timer_frequency() * data.seconds_before_quit); \
+    } \
+  if (data.current_elapsed > data.max_elapsed) \
+    { \
+      data.max_elapsed = data.current_elapsed; \
+      data.run_to_time = get_os_time() + (get_os_timer_frequency() * data.seconds_before_quit); \
+    } \
+  data.current_time = get_os_time(); \
+  }
+
+
 #endif
