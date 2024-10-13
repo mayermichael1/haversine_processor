@@ -19,23 +19,20 @@ get_file_size (u8* file_name)
 static u8*
 read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
 {
-  repetiton_test_data reptest_data = {};
-  REPETITION_TEST_START(reptest_data, 10.f);
+  REPETITION_TEST_START(10.f)
 
   FILE *fp = fopen(file_name, "rb");
 
   if (fp)
     {
-      REPETITION_START_TIMER(reptest_data);
+      REPETITION_START_TIMER();
       fread(memory, sizeof(u8), bytes_to_read, fp);
-      REPETITION_END_TIMER(reptest_data);
+      REPETITION_END_TIMER();
 
       fclose(fp);
     }
 
-  REPETITION_TEST_END(reptest_data);
-  printf("min: %lu\tmax: %lu\n", reptest_data.min_elapsed, reptest_data.max_elapsed);
-
+  REPETITION_TEST_END()
   return memory;
 }
 

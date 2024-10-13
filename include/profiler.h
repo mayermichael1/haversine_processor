@@ -110,7 +110,9 @@ struct repetiton_test_data
   u64 bytes_processed;
 };
 
-#define REPETITION_TEST_START(data, seconds) \
+#define REPETITION_TEST_START(seconds) \
+  { \
+  repetiton_test_data data = {}; \
   data.current_time = get_os_time(); \
   data.seconds_before_quit = seconds; \
   data.run_to_time = data.current_time + ( data.seconds_before_quit * get_os_timer_frequency()); \
@@ -118,10 +120,10 @@ struct repetiton_test_data
   while (data.current_time < data.run_to_time) \
     {
 
-#define REPETITION_START_TIMER(data) data.current_start = get_cpu_time()
-#define REPETITION_END_TIMER(data) data.current_end = get_cpu_time()
+#define REPETITION_START_TIMER() data.current_start = get_cpu_time()
+#define REPETITION_END_TIMER() data.current_end = get_cpu_time()
 
-#define REPETITION_TEST_END(data) \
+#define REPETITION_TEST_END() \
   data.current_elapsed = data.current_end - data.current_start; \
   if (data.current_elapsed < data.min_elapsed) \
     { \
@@ -134,6 +136,8 @@ struct repetiton_test_data
       data.run_to_time = get_os_time() + (get_os_timer_frequency() * data.seconds_before_quit); \
     } \
   data.current_time = get_os_time(); \
+  } \
+  printf("min: %lu\tmax: %lu\n", data.min_elapsed, data.max_elapsed); \
   }
 
 
