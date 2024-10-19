@@ -6,6 +6,8 @@
 #include "calc.h"
 #include "profiler.h"
 
+static u64 cpu_frequency = 0;
+
 static s32 
 get_file_size (u8* file_name)
 {
@@ -17,12 +19,36 @@ get_file_size (u8* file_name)
 
 }
 static u8*
-read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
+read_file_realloc (u8 *file_name, s32 file_size)
 {
-  REPETITION_TEST_START(10.f)
-
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  memory = (u8*)malloc(file_size);
+  
   FILE *fp = fopen(file_name, "rb");
 
+  //NOTE: differnce here: malloc is executed every iteration but not timed
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  free(memory);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static void
+read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
+{
+
+  REPETITION_TEST_START(5.0f);
+  FILE *fp = fopen(file_name, "rb");
   if (fp)
     {
       REPETITION_START_TIMER();
@@ -31,9 +57,7 @@ read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
 
       fclose(fp);
     }
-
-  REPETITION_TEST_END()
-  return memory;
+  REPETITION_TEST_END(cpu_frequency);
 }
 
 static bool
@@ -82,11 +106,22 @@ main (s32 argc, u8 **argv)
     {
       json_file_name = argv[1];
     }
-  
+
+  cpu_frequency = estimate_cpu_frequencies();
 
   json_size = get_file_size(json_file_name);
   json_memory = (u8*)malloc(json_size);
-  read_file(json_file_name, json_size, json_memory);
+
+  while (true)
+  {
+    printf("pre-malloc:\n");
+    read_file(json_file_name, json_size, json_memory);
+
+    printf("malloc:\n");
+    read_file_realloc(json_file_name, json_size);
+  }
+
+#if 0
 
   TIMED_BLOCK("parse");
   while (cursor < json_size)
@@ -180,7 +215,9 @@ main (s32 argc, u8 **argv)
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 
+#endif
   TIMED_BLOCK_END("main");
   print_profiler();
+
   return 0;
 }

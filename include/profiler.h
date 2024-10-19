@@ -115,7 +115,7 @@ struct repetiton_test_data
   repetiton_test_data data = {}; \
   data.current_time = get_os_time(); \
   data.seconds_before_quit = seconds; \
-  data.run_to_time = data.current_time + ( data.seconds_before_quit * get_os_timer_frequency()); \
+  data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
   data.min_elapsed = UINT64_MAX; \
   while (data.current_time < data.run_to_time) \
     {
@@ -123,22 +123,25 @@ struct repetiton_test_data
 #define REPETITION_START_TIMER() data.current_start = get_cpu_time()
 #define REPETITION_END_TIMER() data.current_end = get_cpu_time()
 
-#define REPETITION_TEST_END() \
+#define REPETITION_TEST_END(frequency) \
   data.current_elapsed = data.current_end - data.current_start; \
   if (data.current_elapsed < data.min_elapsed) \
     { \
       data.min_elapsed = data.current_elapsed; \
-      data.run_to_time = get_os_time() + (get_os_timer_frequency() * data.seconds_before_quit); \
+      data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
     } \
   if (data.current_elapsed > data.max_elapsed) \
     { \
       data.max_elapsed = data.current_elapsed; \
-      data.run_to_time = get_os_time() + (get_os_timer_frequency() * data.seconds_before_quit); \
+      data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
     } \
   data.current_time = get_os_time(); \
   } \
-  printf("min: %lu\tmax: %lu\n", data.min_elapsed, data.max_elapsed); \
+  if (frequency > 0) \
+    { \
+      printf("min: %09.8lf sec\tmax: %09.8f sec\n", ((f64)data.min_elapsed/(f64)frequency), ((f64)data.max_elapsed/(f64)frequency)); \
+    } \
+  printf("min: %010lu cycles\tmax: %010lu cycles\n", data.min_elapsed, data.max_elapsed); \
   }
-
 
 #endif
