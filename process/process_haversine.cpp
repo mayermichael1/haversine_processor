@@ -114,11 +114,13 @@ main (s32 argc, u8 **argv)
 
   while (true)
   {
-    printf("pre-malloc:\n");
-    read_file(json_file_name, json_size, json_memory);
-
     printf("malloc:\n");
     read_file_realloc(json_file_name, json_size);
+    printf("\n");
+
+    printf("pre-malloc:\n");
+    read_file(json_file_name, json_size, json_memory);
+    printf("\n");
   }
 
 #if 0
