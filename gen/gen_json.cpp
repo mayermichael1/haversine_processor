@@ -25,8 +25,8 @@ generate_random_coordinate (coordinate cluster_point = {})
 
   if (cluster_point.latitude == 0.0 && cluster_point.longitude == 0.0)
     {
-      coord.longitude = -180.0 + (360 * random);
-      coord.latitude = -180.0 + (360 * random);
+      coord.longitude = -180.0 + (360.0 * random);
+      coord.latitude = -180.0 + (360.0 * random);
     }
   else 
     {
@@ -46,22 +46,22 @@ static void
 get_random_cluster_coords (s32 cluster_ammount, coordinate *cluster_coords, coordinate *cluster)
 {
   f64 random = rand_0_to_1();
-  s32 cluster_number = round(cluster_ammount * random);
+  s32 cluster_number = round((cluster_ammount-1) * random);
   cluster->longitude = cluster_coords[cluster_number].longitude;
   cluster->latitude = cluster_coords[cluster_number].latitude;
 }
 
 static void
-generate_random_clusters (s32 *cluster_ammount, coordinate *cluster_coords)
+generate_random_clusters (s32 *cluster_ammount, coordinate **cluster_coords)
 {      
   f64 random = rand_0_to_1();
-  *cluster_ammount = round(32 * random);
+  *cluster_ammount = round(32.f * random);
 
-  cluster_coords = (coordinate*)malloc(sizeof(coordinate) * (*cluster_ammount));
+  *cluster_coords = (coordinate*)malloc(sizeof(coordinate) * (*cluster_ammount));
 
   for (int i = 0; i < (*cluster_ammount); i++)
     {
-      cluster_coords[i] = generate_random_coordinate({});
+      (*cluster_coords)[i] = generate_random_coordinate();
     }
 }
 
@@ -103,7 +103,7 @@ main (s32 argc, u8** argv)
 
   if (cluster)
     {
-      generate_random_clusters(&cluster_ammount, cluster_coords);
+      generate_random_clusters(&cluster_ammount, &cluster_coords);
     }
 
   FILE *fp = fopen("output.json", "w");
