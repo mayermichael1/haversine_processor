@@ -5,7 +5,6 @@
 
 #include "types.h"
 
-
 inline coordinate 
 operator+ (coordinate a, coordinate b)
 {
@@ -37,6 +36,7 @@ keep_degrees_in_constraint (f64 degree)
       f64 overflow_delta = degree - -180.0;
       degree = 180.0 + overflow_delta;
     }
+  assert(degree <= 180.0 && degree >= -180.0);
   return degree;
 }
 

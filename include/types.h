@@ -28,4 +28,6 @@ struct coordinate
   f64 latitude;
 };
 
+#define assert(cmp) if (!(cmp)) { __builtin_trap();}
+
 #endif
