@@ -270,9 +270,12 @@ init_page_fault_counter()
 
   data.type = PERF_TYPE_SOFTWARE;
   data.size = sizeof(perf_event_attr);
-  data.config = PERF_COUNT_SW_PAGE_FAULTS;
+  data.config = PERF_COUNT_SW_PAGE_FAULTS_MIN;
   data.exclude_hv = 1;
-  data.exclude_kernel = 1;
+  //NOTE: with this parameter off (=0 default) sudo is required to see page faults
+  //NOTE: with this paramter on  (=1) only 1 page fault is reported instead of 
+  //      the real number
+  //data.exclude_kernel = 1;
 
   page_fault_file_descriptor = perf_event_open(&data, 0, -1, -1, 0);
 }

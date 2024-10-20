@@ -100,7 +100,7 @@ print_profiler();
 ///   repetition testing
 ///
 
-struct repetiton_test_data
+struct repetition_test_data
 {
   u64 current_time;
   u64 run_to_time;
@@ -110,35 +110,48 @@ struct repetiton_test_data
   u64 current_end;
   u64 current_elapsed;
 
+  u64 current_elapsed_page_faults;
+  u64 current_start_page_faults;
+  u64 current_end_page_faults;
+
   u64 max_elapsed;
   u64 min_elapsed;
+
+  u64 page_faults_at_max_elapsed;
+  u64 page_faults_at_min_elapsed;
 
   u64 bytes_processed;
 };
 
 #define REPETITION_TEST_START(seconds) \
   { \
-  repetiton_test_data data = {}; \
+  repetition_test_data data = {}; \
   data.current_time = get_os_time(); \
   data.seconds_before_quit = seconds; \
   data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
   data.min_elapsed = UINT64_MAX; \
   while (data.current_time < data.run_to_time) \
-    {
+    { \
+      data.current_start_page_faults = get_page_fault_count();
 
-#define REPETITION_START_TIMER() data.current_start = get_cpu_time()
-#define REPETITION_END_TIMER() data.current_end = get_cpu_time()
+#define REPETITION_START_TIMER() data.current_start = get_cpu_time();
+
+#define REPETITION_END_TIMER() data.current_end = get_cpu_time();
 
 #define REPETITION_TEST_END(frequency) \
+  data.current_end_page_faults = get_page_fault_count(); \
+  data.current_elapsed_page_faults = data.current_end_page_faults - data.current_start_page_faults; \
   data.current_elapsed = data.current_end - data.current_start; \
   if (data.current_elapsed < data.min_elapsed) \
     { \
       data.min_elapsed = data.current_elapsed; \
+      data.page_faults_at_min_elapsed = data.current_elapsed_page_faults; \
       data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
     } \
   if (data.current_elapsed > data.max_elapsed) \
     { \
       data.max_elapsed = data.current_elapsed; \
+      data.page_faults_at_max_elapsed = data.current_elapsed_page_faults; \
       data.run_to_time = data.current_time + (u64)( data.seconds_before_quit * get_os_timer_frequency()); \
     } \
   data.current_time = get_os_time(); \
@@ -148,6 +161,7 @@ struct repetiton_test_data
       printf("min: %09.8lf sec\tmax: %09.8f sec\n", ((f64)data.min_elapsed/(f64)frequency), ((f64)data.max_elapsed/(f64)frequency)); \
     } \
   printf("min: %010lu cycles\tmax: %010lu cycles\n", data.min_elapsed, data.max_elapsed); \
+  printf("Page Faults(min time): %010lu faults\tPage Faults(max time): %010lu faults\n", data.page_faults_at_min_elapsed, data.page_faults_at_max_elapsed); \
   }
 
 #endif

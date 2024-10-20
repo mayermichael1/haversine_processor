@@ -35,12 +35,6 @@ read_file_realloc (u8 *file_name, s32 file_size)
       fread(memory, sizeof(u8), file_size, fp);
       REPETITION_END_TIMER();
 
-      u64 page_faults = get_page_fault_count();
-      if (page_faults > 0)
-        {
-          printf("Page Faults: %lu\n", get_page_fault_count());
-        }
-
       fclose(fp);
     }
 
@@ -60,12 +54,6 @@ read_file (u8 *file_name, s32 bytes_to_read, u8* memory)
       REPETITION_START_TIMER();
       fread(memory, sizeof(u8), bytes_to_read, fp);
       REPETITION_END_TIMER();
-
-      u64 page_faults = get_page_fault_count();
-      if (page_faults > 0)
-        {
-          printf("Page Faults: %lu\n", get_page_fault_count());
-        }
 
       fclose(fp);
     }
