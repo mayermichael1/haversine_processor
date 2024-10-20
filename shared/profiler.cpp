@@ -245,3 +245,47 @@ print_profiler()
     } 
 #endif
 }
+
+#include <linux/perf_event.h>
+#include <linux/hw_breakpoint.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+
+static s32 page_fault_file_descriptor = 0;
+
+static s64 
+perf_event_open(struct perf_event_attr *hw_event, pid_t pid, s32 cpu,
+                s32 group_fd, u64 flags)
+{
+  u32 return_value;
+  return_value = syscall(SYS_perf_event_open, hw_event, pid, cpu, group_fd, flags);
+  return return_value;
+}
+
+void
+init_page_fault_counter()
+{
+  struct perf_event_attr data = {};
+
+  data.type = PERF_TYPE_SOFTWARE;
+  data.size = sizeof(perf_event_attr);
+  data.config = PERF_COUNT_SW_PAGE_FAULTS;
+  data.exclude_hv = 1;
+  data.exclude_kernel = 1;
+
+  page_fault_file_descriptor = perf_event_open(&data, 0, -1, -1, 0);
+}
+
+u64
+get_page_fault_count ()
+{ 
+  u64 count = 0;
+  if (page_fault_file_descriptor != -1)
+    {
+      ioctl(page_fault_file_descriptor, PERF_EVENT_IOC_REFRESH);
+      read(page_fault_file_descriptor, &count, sizeof(count));
+    }
+
+  return count;
+}

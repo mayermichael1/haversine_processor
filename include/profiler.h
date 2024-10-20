@@ -17,6 +17,12 @@ get_cpu_time ();
 u64 
 estimate_cpu_frequencies (u64 milliseconds_to_query = 1000);
 
+void
+init_page_fault_counter();
+
+u64
+get_page_fault_count ();
+
 #define MAX_EVENT_COUNT 1024
 
 struct 
