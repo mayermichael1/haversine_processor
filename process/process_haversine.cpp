@@ -82,6 +82,32 @@ str_contains_any(u8* str, u8* characters)
   return result;
 }
 
+#include <sys/mman.h>
+#define PAGE_SIZE 4096
+
+static void
+probe_page_faults (u32 page_count)
+{
+  printf("probe_to; page_faults; difference\t");
+  for (u32 probe_to = 1; probe_to <= page_count; ++probe_to)
+    {
+      u64 page_faults_before = get_page_fault_count();
+      u8* memory = (u8*)mmap(0, page_count * PAGE_SIZE, PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+      
+      for (u32 probe_to_counter = 0;
+           probe_to_counter < probe_to;
+           ++probe_to_counter)
+        {
+          memory[PAGE_SIZE * probe_to_counter] = '1';
+        }
+      u64 page_faults_after = get_page_fault_count();
+      u64 page_faults = page_faults_after - page_faults_before;
+
+      munmap(memory, PAGE_SIZE * page_count);
+      printf("%5u; %5lu; %5li;\n", probe_to, page_faults, (s64)(page_faults - probe_to));
+    }
+}
+
 s32
 main (s32 argc, u8 **argv)
 {
@@ -109,11 +135,14 @@ main (s32 argc, u8 **argv)
       json_file_name = argv[1];
     }
 
+  /*
   cpu_frequency = estimate_cpu_frequencies();
 
   json_size = get_file_size(json_file_name);
   json_memory = (u8*)malloc(json_size);
+  */
 
+  /*
   while (true)
   {
     printf("malloc:\n");
@@ -124,6 +153,8 @@ main (s32 argc, u8 **argv)
     read_file(json_file_name, json_size, json_memory);
     printf("\n");
   }
+  */
+  probe_page_faults(4096);
 
 #if 0
 
