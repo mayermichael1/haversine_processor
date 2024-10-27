@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 
 #include "types.h"
 #include "calc.h"
 #include "profiler.h"
+
+#define PAGE_SIZE 4096
 
 static u64 cpu_frequency = 0;
 
@@ -39,6 +42,107 @@ read_file_realloc (u8 *file_name, s32 file_size)
     }
 
   free(memory);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static u8*
+read_file_mmap (u8 *file_name, s32 file_size)
+{
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  memory = (u8*)mmap(0, file_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+  
+  FILE *fp = fopen(file_name, "rb");
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  munmap(memory, file_size);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static u8*
+read_file_mmap_rounded_to_page (u8 *file_name, s32 file_size)
+{
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  //s32 mask = ~(4095);
+  s32 mask = ~(2097151);
+  s32 file_size_rounded = (file_size + 2097151) & mask;
+  memory = (u8*)mmap(0, file_size_rounded, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+
+  assert(file_size_rounded %  2097152 == 0)
+
+  FILE *fp = fopen(file_name, "rb");
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  munmap(memory, file_size_rounded);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static u8*
+read_file_mmap_precommit (u8 *file_name, s32 file_size)
+{
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  memory = (u8*)mmap(0, file_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, 0, 0);
+  
+  FILE *fp = fopen(file_name, "rb");
+
+  //NOTE: differnce here: malloc is executed every iteration but not timed
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  munmap(memory, file_size);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static u8*
+read_file_mmap_huge (u8 *file_name, s32 file_size)
+{
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  memory = (u8*)mmap(0, file_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_2MB, 0, 0);
+  
+  FILE *fp = fopen(file_name, "rb");
+
+  //NOTE: differnce here: malloc is executed every iteration but not timed
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  munmap(memory, file_size);
   REPETITION_TEST_END(cpu_frequency);
   return memory;
 }
@@ -82,8 +186,6 @@ str_contains_any(u8* str, u8* characters)
   return result;
 }
 
-#include <sys/mman.h>
-#define PAGE_SIZE 4096
 
 static void
 probe_page_faults (u32 page_count)
@@ -108,6 +210,24 @@ probe_page_faults (u32 page_count)
     }
 }
 
+static void
+test_large_alloc()
+{
+  u64 GB = 1024 * 1024 * 1024;
+  u8* memory = (u8*)mmap(0, 50 * GB, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+
+  if (memory == MAP_FAILED)
+    {
+      printf("Memory alloc did not work\n");
+    }
+  u8 in = '0';
+  scanf(" %c", &in);
+  printf("Now commiting 1GB of this memory\n");
+  mmap(memory, GB, PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, 0, 0);
+  memory[0] = 'H';
+  scanf(" %c", &in);
+}
+
 s32
 main (s32 argc, u8 **argv)
 {
@@ -128,23 +248,20 @@ main (s32 argc, u8 **argv)
   s32 haversine_calc_ammount = 0;
   f64 haversine_sum = 0;
 
-  //estimate_cpu_frequencies();
+  cpu_frequency = estimate_cpu_frequencies();
 
   if (argc >= 2)
     {
       json_file_name = argv[1];
     }
 
-  /*
-  cpu_frequency = estimate_cpu_frequencies();
-
   json_size = get_file_size(json_file_name);
   json_memory = (u8*)malloc(json_size);
-  */
 
-  /*
+  //probe_page_faults(4096);
   while (true)
   {
+    /*
     printf("malloc:\n");
     read_file_realloc(json_file_name, json_size);
     printf("\n");
@@ -152,11 +269,26 @@ main (s32 argc, u8 **argv)
     printf("pre-malloc:\n");
     read_file(json_file_name, json_size, json_memory);
     printf("\n");
-  }
-  */
-  probe_page_faults(4096);
 
-#if 0
+    printf("mmap:\n");
+    read_file_mmap(json_file_name, json_size);
+    printf("\n");
+
+    printf("mmap huge:\n");
+    read_file_mmap_huge(json_file_name, json_size);
+    printf("\n");
+
+    printf("mmap pre populated:\n");
+    read_file_mmap_precommit(json_file_name, json_size);
+    printf("\n");
+    */
+
+    printf("mmap rounded to page:\n");
+    read_file_mmap_rounded_to_page(json_file_name, json_size);
+    printf("\n");
+  }
+  
+
 
   TIMED_BLOCK("parse");
   while (cursor < json_size)
@@ -250,7 +382,6 @@ main (s32 argc, u8 **argv)
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
 
-#endif
   TIMED_BLOCK_END("main");
   print_profiler();
 
