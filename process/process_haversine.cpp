@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <fcntl.h>
 
 #include "types.h"
 #include "calc.h"
@@ -59,6 +60,34 @@ read_file_mmap (u8 *file_name, s32 file_size)
     {
       REPETITION_START_TIMER();
       fread(memory, sizeof(u8), file_size, fp);
+      REPETITION_END_TIMER();
+
+      fclose(fp);
+    }
+
+  munmap(memory, file_size);
+  REPETITION_TEST_END(cpu_frequency);
+  return memory;
+}
+
+static u8*
+read_file_mmap_file_mapped (u8 *file_name, s32 file_size)
+{
+  u8* memory = NULL;
+  REPETITION_TEST_START(5.0f);
+  s32 fd = open(file_name, O_RDONLY);
+  memory = (u8*)mmap(0, file_size, PROT_WRITE, MAP_PRIVATE, fd, 0);
+  
+  FILE *fp = fopen(file_name, "rb");
+
+  if (fp)
+    {
+      REPETITION_START_TIMER();
+      u64 sum = 0;
+      for (s32 i = 0; i < file_size; i++)
+        {
+          sum += memory[i];
+        }
       REPETITION_END_TIMER();
 
       fclose(fp);
@@ -261,7 +290,6 @@ main (s32 argc, u8 **argv)
   //probe_page_faults(4096);
   while (true)
   {
-    /*
     printf("malloc:\n");
     read_file_realloc(json_file_name, json_size);
     printf("\n");
@@ -281,10 +309,13 @@ main (s32 argc, u8 **argv)
     printf("mmap pre populated:\n");
     read_file_mmap_precommit(json_file_name, json_size);
     printf("\n");
-    */
 
     printf("mmap rounded to page:\n");
     read_file_mmap_rounded_to_page(json_file_name, json_size);
+    printf("\n");
+
+    printf("memory mapped file:\n");
+    read_file_mmap_file_mapped(json_file_name, json_size);
     printf("\n");
   }
   
