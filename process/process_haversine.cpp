@@ -110,6 +110,7 @@ main (s32 argc, u8 **argv)
   TIMED_BANDWITH("write_bytes", GB * 3);
   write_to_bytes(GB * 3);
   TIMED_BANDWITH_END("write_bytes");
+  //NOTE: this loop equates to 1.17 cycles per loop iteration
 
   printf("frequency: %lu\n", cpu_frequency);
 
