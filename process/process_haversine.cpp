@@ -49,6 +49,19 @@ read_file (u8 *file_name, s32 file_size)
   return memory;
 }
 
+static void
+write_to_bytes (u64 bytes)
+{
+  u8* memory = (u8*)mmap(0, bytes, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+  
+  for (u32 i = 0; i < bytes; i++)
+    {
+      *(memory+i) = 1;
+    }
+
+  munmap(memory, bytes);
+}
+
 static bool
 str_contains_any(u8* str, u8* characters)
 {
@@ -91,8 +104,16 @@ main (s32 argc, u8 **argv)
   s32 haversine_calc_ammount = 0;
   f64 haversine_sum = 0;
 
-  //cpu_frequency = estimate_cpu_frequencies();
+  cpu_frequency = estimate_cpu_frequencies();
+  //
+  u64 GB = 1024 * 1024 * 1024;
+  TIMED_BANDWITH("write_bytes", GB * 3);
+  write_to_bytes(GB * 3);
+  TIMED_BANDWITH_END("write_bytes");
 
+  printf("frequency: %lu\n", cpu_frequency);
+
+#if 0
   if (argc >= 2)
     {
       json_file_name = argv[1];
@@ -194,6 +215,8 @@ main (s32 argc, u8 **argv)
   TIMED_BLOCK_END("parse");
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
+
+#endif
 
   TIMED_BLOCK_END("main");
   print_profiler();
