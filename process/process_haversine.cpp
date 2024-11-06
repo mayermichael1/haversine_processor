@@ -56,11 +56,16 @@ write_to_bytes (u64 bytes)
   
   for (u32 i = 0; i < bytes; i++)
     {
-      *(memory+i) = 1;
+      *(memory+i) = i;
     }
 
   munmap(memory, bytes);
 }
+
+extern "C" s32 MOVAllBytesASM(s32 count, u8* memory);
+extern "C" s32 NOPAllBytesASM(s32 count);
+extern "C" s32 CMPAllBytesASM(s32 count);
+extern "C" s32 DECAllBytesASM(s32 count);
 
 static bool
 str_contains_any(u8* str, u8* characters)
@@ -111,6 +116,24 @@ main (s32 argc, u8 **argv)
   write_to_bytes(GB * 3);
   TIMED_BANDWITH_END("write_bytes");
   //NOTE: this loop equates to 1.17 cycles per loop iteration
+
+  u8* memory = (u8*)malloc(GB * 3);
+  TIMED_BANDWITH("MOV", GB * 3);
+  MOVAllBytesASM(GB * 3, memory);
+  TIMED_BANDWITH_END("MOV");
+
+  TIMED_BANDWITH("NOP", GB * 3);
+  NOPAllBytesASM(GB * 3);
+  TIMED_BANDWITH_END("NOP");
+
+  TIMED_BANDWITH("CMP", GB * 3);
+  CMPAllBytesASM(GB * 3);
+  TIMED_BANDWITH_END("CMP");
+
+  TIMED_BANDWITH("DEC", GB * 3);
+  DECAllBytesASM(GB * 3);
+  TIMED_BANDWITH_END("DEC");
+
 
   printf("frequency: %lu\n", cpu_frequency);
 
