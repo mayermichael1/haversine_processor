@@ -47,7 +47,8 @@ $(BINARY) : $(OBJFILES)
 
 $(BINARY2) : $(OBJFILES2)
 	nasm -f elf64 process/loop.asm -o build/loop.o
-	$(CXX) $(CXXFLAGS) build/loop.o -o $@ $^
+	nasm -f elf64 process/nop_loop.asm -o build/nop_loop.o
+	$(CXX) $(CXXFLAGS) build/loop.o build/nop_loop.o -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
 	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))

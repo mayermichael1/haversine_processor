@@ -67,6 +67,10 @@ extern "C" s32 NOPAllBytesASM(s32 count);
 extern "C" s32 CMPAllBytesASM(s32 count);
 extern "C" s32 DECAllBytesASM(s32 count);
 
+extern "C" s32 NOP1x3ASM(s32 count);
+extern "C" s32 NOP3x1ASM(s32 count);
+extern "C" s32 NOP9x1ASM(s32 count);
+
 static bool
 str_contains_any(u8* str, u8* characters)
 {
@@ -112,28 +116,17 @@ main (s32 argc, u8 **argv)
   cpu_frequency = estimate_cpu_frequencies();
   //
   u64 GB = 1024 * 1024 * 1024;
-  TIMED_BANDWITH("write_bytes", GB * 3);
-  write_to_bytes(GB * 3);
-  TIMED_BANDWITH_END("write_bytes");
-  //NOTE: this loop equates to 1.17 cycles per loop iteration
+  TIMED_BANDWITH("NOP1x3ASM", GB * 3);
+  NOP1x3ASM(3 * GB);
+  TIMED_BANDWITH_END("NOP1x3ASM");
 
-  u8* memory = (u8*)malloc(GB * 3);
-  TIMED_BANDWITH("MOV", GB * 3);
-  MOVAllBytesASM(GB * 3, memory);
-  TIMED_BANDWITH_END("MOV");
+  TIMED_BANDWITH("NOP3x1ASM", GB * 3);
+  NOP3x1ASM(3 * GB);
+  TIMED_BANDWITH_END("NOP3x1ASM");
 
-  TIMED_BANDWITH("NOP", GB * 3);
-  NOPAllBytesASM(GB * 3);
-  TIMED_BANDWITH_END("NOP");
-
-  TIMED_BANDWITH("CMP", GB * 3);
-  CMPAllBytesASM(GB * 3);
-  TIMED_BANDWITH_END("CMP");
-
-  TIMED_BANDWITH("DEC", GB * 3);
-  DECAllBytesASM(GB * 3);
-  TIMED_BANDWITH_END("DEC");
-
+  TIMED_BANDWITH("NOP9x1ASM", GB * 3);
+  NOP9x1ASM(3 * GB);
+  TIMED_BANDWITH_END("NOP9x1ASM");
 
   printf("frequency: %lu\n", cpu_frequency);
 
