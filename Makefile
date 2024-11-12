@@ -1,5 +1,5 @@
 CXX=g++
-OPT=-O1
+OPT=-O0
 DEPFLAGS=-MP -MD
 
 INCLUDEDIRS=. include
@@ -46,8 +46,8 @@ $(BINARY) : $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BINARY2) : $(OBJFILES2)
-	nasm -f elf64 process/loop.asm -o build/loop.o
-	$(CXX) $(CXXFLAGS) build/loop.o -o $@ $^
+	nasm -f elf64 process/branch.asm -o build/branch.o
+	$(CXX) $(CXXFLAGS) build/branch.o -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
 	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))

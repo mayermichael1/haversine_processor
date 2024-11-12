@@ -3,6 +3,8 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "types.h"
 #include "calc.h"
@@ -11,6 +13,57 @@
 #define PAGE_SIZE 4096
 
 static u64 cpu_frequency = 0;
+
+static void
+fill_memory_with_zero(u64 count, u8* memory)
+{
+  for(u64 i = 0; i < count; i++)
+    {
+      memory[i] = 0;
+    }
+}
+
+static void
+fill_memory_with_random_bytes(u64 count, u8* memory)
+{
+  fill_memory_with_zero(count, memory);
+  s32 random_fd = open("/dev/urandom", O_RDONLY);
+  u64 bytes_written = 0;
+  while (bytes_written < count)
+    {
+      u64 read_count = count - bytes_written;
+      if (read_count > SSIZE_MAX)
+        {
+          read_count = SSIZE_MAX;
+        }
+
+      read(random_fd, memory, read_count);
+
+      bytes_written += read_count;
+    }
+  close(random_fd);
+}
+
+static void
+fill_memory_with_random_bytes_rand(u64 count, u8* memory)
+{
+  fill_memory_with_zero(count, memory);
+  for(u64 i = 0; i < count; ++i)  
+    {
+      memory[i] = rand();
+    }
+}
+
+
+static void
+fill_memory_with_1_every_x(u64 count, u8* memory, u32 stride)
+{
+  fill_memory_with_zero(count, memory);
+  for(u64 i = 0; i < count; i+=stride)
+    {
+      memory[i] = 0;
+    }
+}
 
 static s32 
 get_file_size (u8* file_name)
@@ -62,10 +115,7 @@ write_to_bytes (u64 bytes)
   munmap(memory, bytes);
 }
 
-extern "C" s32 MOVAllBytesASM(s32 count, u8* memory);
-extern "C" s32 NOPAllBytesASM(s32 count);
-extern "C" s32 CMPAllBytesASM(s32 count);
-extern "C" s32 DECAllBytesASM(s32 count);
+extern "C" s32 test_branch_asm(s32 count, u8* memory);
 
 static bool
 str_contains_any(u8* str, u8* characters)
@@ -109,6 +159,7 @@ main (s32 argc, u8 **argv)
   s32 haversine_calc_ammount = 0;
   f64 haversine_sum = 0;
 
+  /*
   cpu_frequency = estimate_cpu_frequencies();
   //
   u64 GB = 1024 * 1024 * 1024;
@@ -137,6 +188,58 @@ main (s32 argc, u8 **argv)
 
   printf("frequency: %lu\n", cpu_frequency);
 
+  */
+
+  u64 size = 1 * 1024 * 1024 * 1024;
+  //u64 size = 25;
+  u8* memory = (u8*)malloc((u64)size);
+  //fill_memory_with_random_bytes(size, memory);
+  //
+  fill_memory_with_zero(size, memory);
+  TIMED_BANDWITH("zerotest",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("zerotest");
+
+  fill_memory_with_1_every_x(size, memory, 1);
+  TIMED_BANDWITH("zerotest",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("zerotest");
+
+  fill_memory_with_1_every_x(size, memory, 3);
+  TIMED_BANDWITH("1every3",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("1every3");
+
+  fill_memory_with_1_every_x(size, memory, 6);
+  TIMED_BANDWITH("1every6",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("1every6");
+
+  fill_memory_with_1_every_x(size, memory, 9);
+  TIMED_BANDWITH("1every9",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("1every9");
+
+  fill_memory_with_1_every_x(size, memory, 12);
+  TIMED_BANDWITH("1every12",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("1every12");
+
+  fill_memory_with_1_every_x(size, memory, 11);
+  TIMED_BANDWITH("1every11",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("1every11");
+
+  fill_memory_with_random_bytes(size, memory);
+  TIMED_BANDWITH("urandom",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("urandom");
+
+  fill_memory_with_random_bytes_rand(size, memory);
+  TIMED_BANDWITH("rand",size);
+  test_branch_asm(size, memory);
+  TIMED_BANDWITH_END("rand");
+  
 #if 0
   if (argc >= 2)
     {
