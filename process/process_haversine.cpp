@@ -61,7 +61,7 @@ fill_memory_with_1_every_x(u64 count, u8* memory, u32 stride)
   fill_memory_with_zero(count, memory);
   for(u64 i = 0; i < count; i+=stride)
     {
-      memory[i] = 0;
+      memory[i] = 1;
     }
 }
 
@@ -201,9 +201,9 @@ main (s32 argc, u8 **argv)
   TIMED_BANDWITH_END("zerotest");
 
   fill_memory_with_1_every_x(size, memory, 1);
-  TIMED_BANDWITH("zerotest",size);
+  TIMED_BANDWITH("allone",size);
   test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("zerotest");
+  TIMED_BANDWITH_END("allone");
 
   fill_memory_with_1_every_x(size, memory, 3);
   TIMED_BANDWITH("1every3",size);
