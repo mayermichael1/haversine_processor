@@ -46,8 +46,8 @@ $(BINARY) : $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BINARY2) : $(OBJFILES2)
-	nasm -f elf64 process/branch.asm -o build/branch.o
-	$(CXX) $(CXXFLAGS) build/branch.o -o $@ $^
+	nasm -f elf64 process/align.asm -o build/align.o
+	$(CXX) $(CXXFLAGS) build/align.o -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
 	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))

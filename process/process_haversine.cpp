@@ -115,7 +115,10 @@ write_to_bytes (u64 bytes)
   munmap(memory, bytes);
 }
 
-extern "C" s32 test_branch_asm(s32 count, u8* memory);
+extern "C" s32 loop_aligned_64(s32 count);
+extern "C" s32 loop_aligned_64_offset_1(s32 count);
+extern "C" s32 loop_aligned_64_offset_5(s32 count);
+extern "C" s32 loop_aligned_64_offset_63(s32 count);
 
 static bool
 str_contains_any(u8* str, u8* characters)
@@ -191,55 +194,22 @@ main (s32 argc, u8 **argv)
   */
 
   u64 size = 1 * 1024 * 1024 * 1024;
-  //u64 size = 25;
-  u8* memory = (u8*)malloc((u64)size);
-  //fill_memory_with_random_bytes(size, memory);
-  //
-  fill_memory_with_zero(size, memory);
-  TIMED_BANDWITH("zerotest",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("zerotest");
+  TIMED_BANDWITH("aligned64", size);
+  loop_aligned_64(size);
+  TIMED_BANDWITH_END("aligned64");
 
-  fill_memory_with_1_every_x(size, memory, 1);
-  TIMED_BANDWITH("allone",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("allone");
+  TIMED_BANDWITH("aligned64_offset1", size);
+  loop_aligned_64_offset_1(size);
+  TIMED_BANDWITH_END("aligned64_offset1");
 
-  fill_memory_with_1_every_x(size, memory, 3);
-  TIMED_BANDWITH("1every3",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("1every3");
+  TIMED_BANDWITH("aligned64_offset5", size);
+  loop_aligned_64_offset_5(size);
+  TIMED_BANDWITH_END("aligned64_offset5");
 
-  fill_memory_with_1_every_x(size, memory, 6);
-  TIMED_BANDWITH("1every6",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("1every6");
+  TIMED_BANDWITH("aligned64_offset63", size);
+  loop_aligned_64_offset_63(size);
+  TIMED_BANDWITH_END("aligned64_offset63");
 
-  fill_memory_with_1_every_x(size, memory, 9);
-  TIMED_BANDWITH("1every9",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("1every9");
-
-  fill_memory_with_1_every_x(size, memory, 12);
-  TIMED_BANDWITH("1every12",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("1every12");
-
-  fill_memory_with_1_every_x(size, memory, 11);
-  TIMED_BANDWITH("1every11",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("1every11");
-
-  fill_memory_with_random_bytes(size, memory);
-  TIMED_BANDWITH("urandom",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("urandom");
-
-  fill_memory_with_random_bytes_rand(size, memory);
-  TIMED_BANDWITH("rand",size);
-  test_branch_asm(size, memory);
-  TIMED_BANDWITH_END("rand");
-  
 #if 0
   if (argc >= 2)
     {
