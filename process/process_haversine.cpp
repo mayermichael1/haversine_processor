@@ -115,11 +115,6 @@ write_to_bytes (u64 bytes)
   munmap(memory, bytes);
 }
 
-extern "C" s32 loop_aligned_64(s32 count);
-extern "C" s32 loop_aligned_64_offset_1(s32 count);
-extern "C" s32 loop_aligned_64_offset_5(s32 count);
-extern "C" s32 loop_aligned_64_offset_63(s32 count);
-
 static bool
 str_contains_any(u8* str, u8* characters)
 {
@@ -192,25 +187,6 @@ main (s32 argc, u8 **argv)
   printf("frequency: %lu\n", cpu_frequency);
 
   */
-
-  u64 size = 1 * 1024 * 1024 * 1024;
-  TIMED_BANDWITH("aligned64", size);
-  loop_aligned_64(size);
-  TIMED_BANDWITH_END("aligned64");
-
-  TIMED_BANDWITH("aligned64_offset1", size);
-  loop_aligned_64_offset_1(size);
-  TIMED_BANDWITH_END("aligned64_offset1");
-
-  TIMED_BANDWITH("aligned64_offset5", size);
-  loop_aligned_64_offset_5(size);
-  TIMED_BANDWITH_END("aligned64_offset5");
-
-  TIMED_BANDWITH("aligned64_offset63", size);
-  loop_aligned_64_offset_63(size);
-  TIMED_BANDWITH_END("aligned64_offset63");
-
-#if 0
   if (argc >= 2)
     {
       json_file_name = argv[1];
@@ -312,8 +288,6 @@ main (s32 argc, u8 **argv)
   TIMED_BLOCK_END("parse");
 
   printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
-
-#endif
 
   TIMED_BLOCK_END("main");
   print_profiler();

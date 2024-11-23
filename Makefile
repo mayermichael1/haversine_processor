@@ -38,16 +38,34 @@ DEPFILES2:=$(patsubst ./,,$(DEPFILES2))
 
 BINARY2=$(BUILDDIR)/process_json
 
+# testing process
+SRCDIRS3=testing shared
+
+CPPFILES3:=$(foreach dir, $(SRCDIRS3), $(wildcard $(dir)/*.cpp))
+
+OBJFILES3:=$(patsubst %.cpp, %.o, $(CPPFILES3))
+OBJFILES3:=$(addprefix $(BUILDDIR)/, $(OBJFILES3))
+OBJFILES3:=$(patsubst ./,,$(OBJFILES3))
+
+DEPFILES3:=$(patsubst %.cpp, %.d, $(CPPFILES3))
+DEPFILES3:=$(addprefix $(BUILDDIR)/, $(DEPFILES3))
+DEPFILES3:=$(patsubst ./,,$(DEPFILES3))
+
+BINARY3=$(BUILDDIR)/test
+
 # targets
 
-all: $(BINARY) $(BINARY2)
+all: $(BINARY) $(BINARY2) $(BINARY3)
 
 $(BINARY) : $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BINARY2) : $(OBJFILES2)
-	nasm -f elf64 process/align.asm -o build/align.o
-	$(CXX) $(CXXFLAGS) build/align.o -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(BINARY3) : $(OBJFILES3)
+	#nasm -f elf64 process/align.asm -o build/align.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
 	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))
