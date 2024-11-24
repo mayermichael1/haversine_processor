@@ -64,8 +64,8 @@ $(BINARY2) : $(OBJFILES2)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 $(BINARY3) : $(OBJFILES3)
-	nasm -f elf64 testing/port_test.asm -o build/port_test.o
-	$(CXX) $(CXXFLAGS) build/port_test.o -o $@ $^
+	nasm -f elf64 testing/width_test.asm -o build/width_test.o
+	$(CXX) $(CXXFLAGS) build/width_test.o -o $@ $^
 
 $(BUILDDIR)/%.o : %.cpp
 	mkdir -p $(addprefix $(BUILDDIR)/, $(dir $<))

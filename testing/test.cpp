@@ -2,44 +2,54 @@
 #include "profiler.h"
 #include "types.h"
 
-extern "C" void read_x_1(s32 count, u8* character);
-extern "C" void read_x_2(s32 count, u8* character);
-extern "C" void read_x_3(s32 count, u8* character);
-extern "C" void read_x_4(s32 count, u8* character);
-extern "C" void read_x_5(s32 count, u8* character);
-extern "C" void read_x_6(s32 count, u8* character);
+extern "C" void read_4x2(s32 count, u8* memory);
+extern "C" void read_8x2(s32 count, u8* memory);
+extern "C" void read_16x2(s32 count, u8* memory);
+extern "C" void read_32x2(s32 count, u8* memory);
 
 s32 
 main (s32 argc, u8** argv )
 {
-  u8 character = 'u';
+  u8 memory[64];
+  for (s32 i = 0; i < 64; ++i)
+    {
+      memory[i] = i % 10;
+    }
   u64 GB = 1024 * 1024 * 1024;
   u64 size = GB * 3;
 
-  TIMED_BANDWITH("read_x_1", size);
-  read_x_1(size, &character);
-  TIMED_BANDWITH_END("read_x_1");
+  init_page_fault_counter();
+  u64 frequency = estimate_cpu_frequencies();
+  f32 test_for_seconds = 5;
 
-  TIMED_BANDWITH("read_x_2", size);
-  read_x_2(size, &character);
-  TIMED_BANDWITH_END("read_x_2");
+  printf("read_4x2");
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  read_4x2(size, memory);
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency);
 
-  TIMED_BANDWITH("read_x_3", size);
-  read_x_3(size, &character);
-  TIMED_BANDWITH_END("read_x_3");
+  printf("read_8x2");
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  read_8x2(size, memory);
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency);
 
-  TIMED_BANDWITH("read_x_4", size);
-  read_x_4(size, &character);
-  TIMED_BANDWITH_END("read_x_4");
+  printf("read_16x2");
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  read_16x2(size, memory);
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency);
 
-  TIMED_BANDWITH("read_x_5", size);
-  read_x_5(size, &character);
-  TIMED_BANDWITH_END("read_x_5");
+  printf("read_32x2");
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  read_32x2(size, memory);
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency);
 
-  TIMED_BANDWITH("read_x_6", size);
-  read_x_6(size, &character);
-  TIMED_BANDWITH_END("read_x_6");
-j 
   print_profiler();
   return 1;
 }
