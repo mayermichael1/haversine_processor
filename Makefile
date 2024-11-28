@@ -81,4 +81,7 @@ clean:
 	rm -f $(BINARY2)
 	rm -f $(DEPFILES2)
 	rm -f $(OBJFILES2)
+	rm -f $(BINARY3)
+	rm -f $(DEPFILES3)
+	rm -f $(OBJFILES3)
 	rm -f compile_commands.json

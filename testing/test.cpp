@@ -30,7 +30,7 @@ main (s32 argc, u8** argv )
   REPETITION_START_TIMER();
   bandwidth_test(size, memory);
   REPETITION_END_TIMER();
-  REPETITION_TEST_END(frequency);
+  REPETITION_TEST_END(frequency, size);
 
   print_profiler();
   return 1;

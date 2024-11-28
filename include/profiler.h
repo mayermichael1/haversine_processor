@@ -138,7 +138,7 @@ struct repetition_test_data
 
 #define REPETITION_END_TIMER() data.current_end = get_cpu_time();
 
-#define REPETITION_TEST_END(frequency) \
+#define REPETITION_TEST_END(frequency, bytes) \
   data.current_end_page_faults = get_page_fault_count(); \
   data.current_elapsed_page_faults = data.current_end_page_faults - data.current_start_page_faults; \
   data.current_elapsed = data.current_end - data.current_start; \
@@ -158,7 +158,14 @@ struct repetition_test_data
   } \
   if (frequency > 0) \
     { \
-      printf("min: %09.8lf sec\tmax: %09.8f sec\n", ((f64)data.min_elapsed/(f64)frequency), ((f64)data.max_elapsed/(f64)frequency)); \
+      f64 min_seconds = ((f64)data.min_elapsed/(f64)frequency); \
+      f64 max_seconds = ((f64)data.max_elapsed/(f64)frequency); \
+      printf("min: %09.8lf sec\tmax: %09.8f sec\n", min_seconds, max_seconds); \
+      if (bytes > 0) \
+        { \
+          f64 gigabytes = bytes / 1024.f / 2024.f / 2024.f; \
+          printf("min test bandwidth: %lf gb/s\tmax test bandwidth: %lf gb/s \n", gigabytes / min_seconds, gigabytes / max_seconds); \
+        } \
     } \
   printf("min: %010lu cycles\tmax: %010lu cycles\n", data.min_elapsed, data.max_elapsed); \
   printf("Page Faults(min time): %010lu faults\tPage Faults(max time): %010lu faults\n", data.page_faults_at_min_elapsed, data.page_faults_at_max_elapsed); \
