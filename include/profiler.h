@@ -28,19 +28,19 @@ get_page_fault_count ();
 struct 
 event_data
 {
-  u8* title;
-  u64 start_time;
-  u64 end_time;
-  u64 elapsed;
-  u64 bytes_processed;
+    u8* title;
+    u64 start_time;
+    u64 end_time;
+    u64 elapsed;
+    u64 bytes_processed;
 };
 
 struct 
 timed_block
 {
-  timed_block(u8* title, u64 bytes_processed);
-  ~timed_block();
-  event_data data;
+    timed_block(u8* title, u64 bytes_processed);
+    ~timed_block();
+    event_data data;
 };
 
 ///
@@ -55,7 +55,7 @@ timed_block
 struct
 profiler_data
 {
-  event_data events[MAX_EVENT_COUNT];
+    event_data events[MAX_EVENT_COUNT];
 };
 
 extern profiler_data profiler;
@@ -102,25 +102,25 @@ print_profiler();
 
 struct repetition_test_data
 {
-  u64 current_time;
-  u64 run_to_time;
-  f32 seconds_before_quit;
+    u64 current_time;
+    u64 run_to_time;
+    f32 seconds_before_quit;
 
-  u64 current_start;
-  u64 current_end;
-  u64 current_elapsed;
+    u64 current_start;
+    u64 current_end;
+    u64 current_elapsed;
 
-  u64 current_elapsed_page_faults;
-  u64 current_start_page_faults;
-  u64 current_end_page_faults;
+    u64 current_elapsed_page_faults;
+    u64 current_start_page_faults;
+    u64 current_end_page_faults;
 
-  u64 max_elapsed;
-  u64 min_elapsed;
+    u64 max_elapsed;
+    u64 min_elapsed;
 
-  u64 page_faults_at_max_elapsed;
-  u64 page_faults_at_min_elapsed;
+    u64 page_faults_at_max_elapsed;
+    u64 page_faults_at_min_elapsed;
 
-  u64 bytes_processed;
+    u64 bytes_processed;
 };
 
 #define REPETITION_TEST_START(seconds) \

@@ -24,8 +24,8 @@ typedef bool    b8;
 
 struct coordinate
 {
-  f64 longitude;
-  f64 latitude;
+    f64 longitude;
+    f64 latitude;
 };
 
 #define assert(cmp) if (!(cmp)) { __builtin_trap();}
