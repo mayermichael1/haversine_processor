@@ -38,9 +38,8 @@ main (s32 argc, u8** argv )
 
   init_page_fault_counter();
   u64 frequency = estimate_cpu_frequencies();
-  u64 mask = 128;
 
-  for (u64 mask = 128; mask < size; mask*=2)
+  for (u64 mask = 256; mask < size; mask*=2)
     {
       repetition_test_bandwidth(size, memory, mask);
     }
