@@ -2,13 +2,16 @@ global bandwidth_test
 
 bandwidth_test:
 	align 64
-    mov r8, rsi
+    xor r8, r8
 .loop:
-    vmovdqu ymm0, [r8]
-    vmovdqu ymm1, [r8 + 32]
-    vmovdqu ymm2, [r8 + 64]
-    vmovdqu ymm3, [r8 + 96]
-    add rsi, 128
+    mov r9, rsi
+    add r9, r8
+    vmovdqu ymm0, [r9]
+    vmovdqu ymm1, [r9 + 32]
+    vmovdqu ymm2, [r9 + 64]
+    vmovdqu ymm3, [r9 + 96]
+    add r8, 128
+    and r8, rdx
     sub rdi, 128 
     ja .loop
     ret

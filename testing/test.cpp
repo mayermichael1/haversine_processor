@@ -3,7 +3,22 @@
 #include "types.h"
 #include <sys/mman.h>
 
-extern "C" void bandwidth_test(u64 read_count, u8* memory);
+extern "C" void bandwidth_test(u64 read_count, u8* memory, u64 mask);
+
+void 
+repetition_test_bandwidth(u64 read_count, u8* memory, u64 mask)
+{
+  static f32 test_for_seconds = 5;
+  static u64 frequency = estimate_cpu_frequencies();
+
+  printf("bandwidth_test (%lu mask): \n", mask);
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  bandwidth_test(read_count, memory, (mask-1));
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency, read_count);
+  printf("\n");
+}
 
 s32 
 main (s32 argc, u8** argv )
@@ -23,18 +38,14 @@ main (s32 argc, u8** argv )
 
   init_page_fault_counter();
   u64 frequency = estimate_cpu_frequencies();
-  f32 test_for_seconds = 5;
+  u64 mask = 128;
 
-  printf("bandwidth_test: \n");
-  REPETITION_TEST_START(test_for_seconds);
-  REPETITION_START_TIMER();
-  bandwidth_test(size, memory);
-  REPETITION_END_TIMER();
-  REPETITION_TEST_END(frequency, size);
+  for (u64 mask = 128; mask < size; mask*=2)
+    {
+      repetition_test_bandwidth(size, memory, mask);
+    }
 
-  print_profiler();
+  //print_profiler();
   return 1;
 }
-
-
 
