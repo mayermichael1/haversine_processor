@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 
 extern "C" void bandwidth_test(u64 read_count, u8* memory, u64 mask);
+extern "C" void bandwidth_test_free_range(u64 repetition_count, u8* memory, u64 per_iteration_read_count);
 
 void 
 repetition_test_bandwidth(u64 read_count, u8* memory, u64 mask)
@@ -17,6 +18,21 @@ repetition_test_bandwidth(u64 read_count, u8* memory, u64 mask)
   bandwidth_test(read_count, memory, (mask-1));
   REPETITION_END_TIMER();
   REPETITION_TEST_END(frequency, read_count);
+  printf("\n");
+}
+
+void 
+repetition_test_bandwidth_free_range(u64 repetitions, u8* memory, u64 read_count)
+{
+  static f32 test_for_seconds = 5;
+  static u64 frequency = estimate_cpu_frequencies();
+
+  printf("bandwidth_test_free_range (%lu mask): \n", read_count);
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  bandwidth_test_free_range(repetitions, memory, read_count);
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency, repetitions * read_count);
   printf("\n");
 }
 
@@ -42,6 +58,7 @@ main (s32 argc, u8** argv )
   for (u64 mask = 256; mask < size; mask*=2)
     {
       repetition_test_bandwidth(size, memory, mask);
+      repetition_test_bandwidth_free_range(size / mask, memory, mask);
     }
 
   //print_profiler();

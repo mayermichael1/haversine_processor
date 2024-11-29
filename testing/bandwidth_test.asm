@@ -1,4 +1,5 @@
 global bandwidth_test
+global bandwidth_test_free_range
 
 bandwidth_test:
 	align 64
@@ -18,5 +19,27 @@ bandwidth_test:
     and r8, rdx
     sub rdi, 256 
     ja .loop
+    ret
+
+bandwidth_test_free_range:
+	align 64
+    add rdx, rsi
+.outer: 
+    mov r8, rsi
+    .inner:
+        vmovdqu ymm0, [r8]
+        vmovdqu ymm1, [r8 + 32]
+        vmovdqu ymm2, [r8 + 64]
+        vmovdqu ymm3, [r8 + 96]
+        vmovdqu ymm0, [r8 + 128]
+        vmovdqu ymm1, [r8 + 160]
+        vmovdqu ymm2, [r8 + 192]
+        vmovdqu ymm3, [r8 + 224]
+        add r8, 256 
+        cmp r8, rdx
+        jl .inner
+
+    sub rdi, 1
+    jnz .outer
     ret
 
