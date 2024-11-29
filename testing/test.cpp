@@ -40,7 +40,9 @@ s32
 main (s32 argc, u8** argv )
 {
   u8 *memory;
-  u64 GB = 1024 * 1024 * 1024;
+  u64 KB = 1024;
+  u64 MB = KB * 1024;
+  u64 GB = MB * 1024;
   u64 size = GB * 3;
 
   memory = (u8*)mmap(
@@ -55,10 +57,10 @@ main (s32 argc, u8** argv )
   init_page_fault_counter();
   u64 frequency = estimate_cpu_frequencies();
 
-  for (u64 mask = 256; mask < size; mask*=2)
+  for (u64 read_count = MB * 16; read_count < size; read_count+=MB)
     {
-      repetition_test_bandwidth(size, memory, mask);
-      repetition_test_bandwidth_free_range(size / mask, memory, mask);
+      //repetition_test_bandwidth(size, memory, mask);
+      repetition_test_bandwidth_free_range(size / read_count, memory, read_count);
     }
 
   //print_profiler();
