@@ -163,7 +163,7 @@ struct repetition_test_data
       printf("min: %09.8lf sec\tmax: %09.8f sec\n", min_seconds, max_seconds); \
       if (bytes > 0) \
         { \
-          f64 gigabytes = bytes / 1024.f / 2024.f / 2024.f; \
+          f64 gigabytes = bytes / 1024.f / 1024.f / 1024.f; \
           printf("min test bandwidth: %lf gb/s\tmax test bandwidth: %lf gb/s \n", gigabytes / min_seconds, gigabytes / max_seconds); \
         } \
     } \
