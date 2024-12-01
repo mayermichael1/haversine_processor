@@ -1,5 +1,21 @@
-global bandwidth_test
-global bandwidth_test_free_range
+global cache_test 
+
+; rdi, rsi, rdx, rcx
+cache_test:
+    align 64
+.outer:
+    xor r9, r9
+    mov r8, rsi
+    .inner:
+        mov rax, [r8]
+        add r8, rdx
+        add r9, 8
+        cmp r9, rdi
+        jl .inner
+    dec rcx
+    jnz .outer
+    ret
+
 
 bandwidth_test:
 	align 64
