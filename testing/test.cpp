@@ -22,6 +22,21 @@ repetition_test_bandwidth(u64 read_count, u8* memory, u64 mask)
 }
 
 void 
+repetition_test_bandwidth_offset(u64 read_count, u8* memory, u64 mask, u32 offset)
+{
+  static f32 test_for_seconds = 5;
+  static u64 frequency = estimate_cpu_frequencies();
+
+  printf("bandwidth_test (%lu mask + %i): \n", mask, offset);
+  REPETITION_TEST_START(test_for_seconds);
+  REPETITION_START_TIMER();
+  bandwidth_test(read_count, (memory + offset), (mask-1));
+  REPETITION_END_TIMER();
+  REPETITION_TEST_END(frequency, read_count);
+  printf("\n");
+}
+
+void 
 repetition_test_bandwidth_free_range(u64 repetitions, u8* memory, u64 read_count)
 {
   static f32 test_for_seconds = 5;
@@ -57,10 +72,12 @@ main (s32 argc, u8** argv )
   init_page_fault_counter();
   u64 frequency = estimate_cpu_frequencies();
 
-  for (u64 read_count = MB * 16; read_count < size; read_count+=MB)
+  for (u64 mask = 256; mask < size; mask*=2)
     {
-      //repetition_test_bandwidth(size, memory, mask);
-      repetition_test_bandwidth_free_range(size / read_count, memory, read_count);
+      repetition_test_bandwidth(size, memory, mask);
+      repetition_test_bandwidth_offset(size, memory, mask, 1);
+      repetition_test_bandwidth_offset(size, memory, mask, 31);
+      //repetition_test_bandwidth_free_range(size / read_count, memory, read_count);
     }
 
   //print_profiler();
