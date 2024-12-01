@@ -39,7 +39,7 @@ main (s32 argc, u8** argv )
   TIMED_BANDWITH("read_x_6", size);
   read_x_6(size, &character);
   TIMED_BANDWITH_END("read_x_6");
-j 
+
   print_profiler();
   return 1;
 }
