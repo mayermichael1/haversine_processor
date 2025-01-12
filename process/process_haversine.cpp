@@ -53,8 +53,9 @@ read_file (u8 *file_name, s32 file_size)
 }
 
 static u8*
-pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size, u8 *memory)
+pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size)
 {
+    u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
     for (u32 offset = 0; offset < buffer_size; offset += PAGE_SIZE)
     {
         memory[offset] = 0;
@@ -64,9 +65,10 @@ pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size, u8 *memory)
 }
 
 static u8*
-read_from_memory(u8* file_name, u32 file_size, u32 buffer_size, u8 *memory, 
-    u8* read_buffer)
+read_from_memory(u8* file_name, u32 file_size, u32 buffer_size, u8* read_buffer)
 {
+    u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+
     s64 size_remaining = file_size;
     for (u64 offset = 0; offset < file_size; offset += buffer_size)
     {
@@ -83,8 +85,9 @@ read_from_memory(u8* file_name, u32 file_size, u32 buffer_size, u8 *memory,
 
 
 static u8*
-read_from_file(u8* file_name, u32 file_size, u32 buffer_size, u8 *memory)
+read_from_file(u8* file_name, u32 file_size, u32 buffer_size)
 {
+    u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
 
     FILE *fp = fopen(file_name, "rb");
     s64 size_remaining = file_size;
@@ -173,7 +176,7 @@ main (s32 argc, u8 **argv)
         printf("pre fault %i:\n", buffer_size);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
-        pre_fault_buffer(json_file_name, json_size, buffer_size, memory); 
+        pre_fault_buffer(json_file_name, json_size, buffer_size); 
         REPETITION_END_TIMER();
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
@@ -181,7 +184,7 @@ main (s32 argc, u8 **argv)
         printf("memory %i :\n", buffer_size);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
-        read_from_memory(json_file_name, json_size, buffer_size, memory, read_buffer); 
+        read_from_memory(json_file_name, json_size, buffer_size, read_buffer); 
         REPETITION_END_TIMER();
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
@@ -189,7 +192,7 @@ main (s32 argc, u8 **argv)
         printf("file %i :\n", buffer_size);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
-        read_from_file(json_file_name, json_size, buffer_size, memory); 
+        read_from_file(json_file_name, json_size, buffer_size); 
         REPETITION_END_TIMER();
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
