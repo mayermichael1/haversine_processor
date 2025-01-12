@@ -10,60 +10,11 @@
 #include "calc.h"
 #include "profiler.h"
 
+#define KB 1024
+#define MB KB * KB
 #define PAGE_SIZE 4096
 
 static u64 cpu_frequency = 0;
-
-static void
-fill_memory_with_zero(u64 count, u8* memory)
-{
-    for(u64 i = 0; i < count; i++)
-    {
-        memory[i] = 0;
-    }
-}
-
-static void
-fill_memory_with_random_bytes(u64 count, u8* memory)
-{
-    fill_memory_with_zero(count, memory);
-    s32 random_fd = open("/dev/urandom", O_RDONLY);
-    u64 bytes_written = 0;
-    while (bytes_written < count)
-    {
-        u64 read_count = count - bytes_written;
-        if (read_count > SSIZE_MAX)
-        {
-            read_count = SSIZE_MAX;
-        }
-
-        read(random_fd, memory, read_count);
-
-        bytes_written += read_count;
-    }
-    close(random_fd);
-}
-
-static void
-fill_memory_with_random_bytes_rand(u64 count, u8* memory)
-{
-    fill_memory_with_zero(count, memory);
-    for(u64 i = 0; i < count; ++i)  
-    {
-        memory[i] = rand();
-    }
-}
-
-
-static void
-fill_memory_with_1_every_x(u64 count, u8* memory, u32 stride)
-{
-    fill_memory_with_zero(count, memory);
-    for(u64 i = 0; i < count; i+=stride)
-    {
-        memory[i] = 1;
-    }
-}
 
 static s32 
 get_file_size (u8* file_name)
@@ -98,6 +49,54 @@ read_file (u8 *file_name, s32 file_size)
 
     //munmap(memory, file_size);
     //REPETITION_TEST_END(cpu_frequency);
+    return memory;
+}
+
+static u8*
+pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size, u8 *memory)
+{
+    for (u32 offset = 0; offset < buffer_size; offset += PAGE_SIZE)
+    {
+        memory[offset] = 0;
+    }
+
+    return memory;
+}
+
+static u8*
+read_from_memory(u8* file_name, u32 file_size, u32 buffer_size, u8 *memory, 
+    u8* read_buffer)
+{
+    s64 size_remaining = file_size;
+    for (u64 offset = 0; offset < file_size; offset += buffer_size)
+    {
+        memcpy(memory, (read_buffer + offset), buffer_size);
+        size_remaining -= offset; 
+    }
+    if (size_remaining > 0)
+    {
+        memcpy(memory, read_buffer, size_remaining);
+    }
+
+    return memory;
+}
+
+
+static u8*
+read_from_file(u8* file_name, u32 file_size, u32 buffer_size, u8 *memory)
+{
+
+    FILE *fp = fopen(file_name, "rb");
+    s64 size_remaining = file_size;
+    for (s64 offset = 0; offset < file_size; offset += buffer_size)
+    {
+        fread(memory, sizeof(u8), buffer_size, fp);
+        size_remaining -= offset; 
+    }
+    fread(memory, sizeof(u8), buffer_size, fp);
+
+    fclose(fp);
+
     return memory;
 }
 
@@ -156,41 +155,51 @@ main (s32 argc, u8 **argv)
     s32 haversine_calc_ammount = 0;
     f64 haversine_sum = 0;
 
-    /*
-    cpu_frequency = estimate_cpu_frequencies();
-    //
-    u64 GB = 1024 * 1024 * 1024;
-    TIMED_BANDWITH("write_bytes", GB * 3);
-    write_to_bytes(GB * 3);
-    TIMED_BANDWITH_END("write_bytes");
-    //NOTE: this loop equates to 1.17 cycles per loop iteration
-
-    u8* memory = (u8*)malloc(GB * 3);
-    TIMED_BANDWITH("MOV", GB * 3);
-    MOVAllBytesASM(GB * 3, memory);
-    TIMED_BANDWITH_END("MOV");
-
-    TIMED_BANDWITH("NOP", GB * 3);
-    NOPAllBytesASM(GB * 3);
-    TIMED_BANDWITH_END("NOP");
-
-    TIMED_BANDWITH("CMP", GB * 3);
-    CMPAllBytesASM(GB * 3);
-    TIMED_BANDWITH_END("CMP");
-
-    TIMED_BANDWITH("DEC", GB * 3);
-    DECAllBytesASM(GB * 3);
-    TIMED_BANDWITH_END("DEC");
-
-
-    printf("frequency: %lu\n", cpu_frequency);
-
-    */
     if (argc >= 2)
     {
         json_file_name = argv[1];
     }
 
+    cpu_frequency = estimate_cpu_frequencies();
+
+    json_size = get_file_size(json_file_name);
+    u8* read_buffer = (u8*)mmap(0, json_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE , 0, 0);
+
+    for (u32 buffer_size = 0.5 * KB; buffer_size < 4 * MB;)
+    {
+        buffer_size = buffer_size * 2;
+        u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE , 0, 0);
+
+        printf("pre fault %i:\n", buffer_size);
+        REPETITION_TEST_START(5.0);
+        REPETITION_START_TIMER();
+        pre_fault_buffer(json_file_name, json_size, buffer_size, memory); 
+        REPETITION_END_TIMER();
+        REPETITION_TEST_END(cpu_frequency, json_size);
+        printf("\n");
+
+        printf("memory %i :\n", buffer_size);
+        REPETITION_TEST_START(5.0);
+        REPETITION_START_TIMER();
+        read_from_memory(json_file_name, json_size, buffer_size, memory, read_buffer); 
+        REPETITION_END_TIMER();
+        REPETITION_TEST_END(cpu_frequency, json_size);
+        printf("\n");
+
+        printf("file %i :\n", buffer_size);
+        REPETITION_TEST_START(5.0);
+        REPETITION_START_TIMER();
+        read_from_file(json_file_name, json_size, buffer_size, memory); 
+        REPETITION_END_TIMER();
+        REPETITION_TEST_END(cpu_frequency, json_size);
+        printf("\n");
+    }
+
+    TIMED_BANDWITH("read",json_size);
+    read_file(json_file_name, json_size);
+    TIMED_BANDWITH_END("read");
+
+#if 0
     json_size = get_file_size(json_file_name);
     TIMED_BANDWITH("read",json_size);
     json_memory = read_file(json_file_name, json_size);
@@ -266,6 +275,8 @@ main (s32 argc, u8 **argv)
     TIMED_BLOCK_END("parse");
 
     printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
+
+#endif
 
     TIMED_BLOCK_END("main");
     print_profiler();
