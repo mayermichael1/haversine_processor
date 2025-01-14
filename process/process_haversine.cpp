@@ -11,7 +11,7 @@
 #include "profiler.h"
 
 #define KB 1024
-#define MB KB * KB
+#define MB (KB * KB)
 #define PAGE_SIZE 4096
 
 static u64 cpu_frequency = 0;
@@ -52,7 +52,7 @@ read_file (u8 *file_name, s32 file_size)
     return memory;
 }
 
-static u8*
+void
 pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size)
 {
     u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
@@ -60,47 +60,45 @@ pre_fault_buffer (u8* file_name, u32 file_size, u32 buffer_size)
     {
         memory[offset] = 0;
     }
-
-    return memory;
+    munmap(memory, buffer_size);
 }
 
-static u8*
+void
 read_from_memory(u8* file_name, u32 file_size, u32 buffer_size, u8* read_buffer)
 {
     u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
 
     s64 size_remaining = file_size;
-    for (u64 offset = 0; offset < file_size; offset += buffer_size)
+    for (u64 offset = 0; offset < (file_size - buffer_size); offset += buffer_size)
     {
         memcpy(memory, (read_buffer + offset), buffer_size);
         size_remaining -= offset; 
     }
     if (size_remaining > 0)
     {
-        memcpy(memory, read_buffer, size_remaining);
+        memcpy(memory, read_buffer + (file_size - buffer_size), size_remaining);
     }
 
-    return memory;
+    munmap(memory, buffer_size);
 }
 
 
-static u8*
+void
 read_from_file(u8* file_name, u32 file_size, u32 buffer_size)
 {
     u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
 
     FILE *fp = fopen(file_name, "rb");
     s64 size_remaining = file_size;
-    for (s64 offset = 0; offset < file_size; offset += buffer_size)
+    for (s64 offset = 0; offset < (file_size - buffer_size); offset += buffer_size)
     {
         fread(memory, sizeof(u8), buffer_size, fp);
         size_remaining -= offset; 
     }
-    fread(memory, sizeof(u8), buffer_size, fp);
+    fread(memory, sizeof(u8), size_remaining, fp);
 
     fclose(fp);
-
-    return memory;
+    munmap(memory, buffer_size);
 }
 
 static void
@@ -168,12 +166,9 @@ main (s32 argc, u8 **argv)
     json_size = get_file_size(json_file_name);
     u8* read_buffer = (u8*)mmap(0, json_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE , 0, 0);
 
-    for (u32 buffer_size = 0.5 * KB; buffer_size < 4 * MB;)
+    for (u32 buffer_size = 0.5 * KB; buffer_size < 128 * MB; /**/)
     {
-        buffer_size = buffer_size * 2;
-        u8* memory = (u8*)mmap(0, buffer_size, PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE , 0, 0);
-
-        printf("pre fault %i:\n", buffer_size);
+        printf("pre fault %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
         pre_fault_buffer(json_file_name, json_size, buffer_size); 
@@ -181,7 +176,7 @@ main (s32 argc, u8 **argv)
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
 
-        printf("memory %i :\n", buffer_size);
+        printf("memory %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
         read_from_memory(json_file_name, json_size, buffer_size, read_buffer); 
@@ -189,14 +184,41 @@ main (s32 argc, u8 **argv)
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
 
-        printf("file %i :\n", buffer_size);
+        printf("file %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
         REPETITION_TEST_START(5.0);
         REPETITION_START_TIMER();
         read_from_file(json_file_name, json_size, buffer_size); 
         REPETITION_END_TIMER();
         REPETITION_TEST_END(cpu_frequency, json_size);
         printf("\n");
+
+        buffer_size = buffer_size * 2;
     }
+
+    u32 buffer_size = json_size;
+    printf("pre fault %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
+    REPETITION_TEST_START(5.0);
+    REPETITION_START_TIMER();
+    pre_fault_buffer(json_file_name, json_size, buffer_size); 
+    REPETITION_END_TIMER();
+    REPETITION_TEST_END(cpu_frequency, json_size);
+    printf("\n");
+
+    printf("memory %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
+    REPETITION_TEST_START(5.0);
+    REPETITION_START_TIMER();
+    read_from_memory(json_file_name, json_size, buffer_size, read_buffer); 
+    REPETITION_END_TIMER();
+    REPETITION_TEST_END(cpu_frequency, json_size);
+    printf("\n");
+
+    printf("file %ib %iKB %iMB:\n", buffer_size, buffer_size / KB, buffer_size / MB);
+    REPETITION_TEST_START(5.0);
+    REPETITION_START_TIMER();
+    read_from_file(json_file_name, json_size, buffer_size); 
+    REPETITION_END_TIMER();
+    REPETITION_TEST_END(cpu_frequency, json_size);
+    printf("\n");
 
     TIMED_BANDWITH("read",json_size);
     read_file(json_file_name, json_size);
