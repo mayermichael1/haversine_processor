@@ -161,11 +161,15 @@ main (s32 argc, u8** argv)
         fprintf(fp, "}\n");
     }
 
+    f64 average = haversine_sum / output_ammount;
+    fwrite(&average, sizeof(average), 1, fp_results); 
+
     fclose(fp);
     fclose(fp_results);
 
     printf("sum: %f\n", haversine_sum);
-    printf("avg: %f\n", (haversine_sum/output_ammount));
+    printf("avg: %f\n", average);
+
     if (cluster)
     {
         printf("clustered output\n");
