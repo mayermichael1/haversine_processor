@@ -107,6 +107,7 @@ main (s32 argc, u8** argv)
     }
 
     FILE *fp = fopen("output.json", "w");
+    FILE *fp_results = fopen("results.bin", "wb");
     if (fp)
     {
         fprintf(fp, "{\n");
@@ -150,8 +151,10 @@ main (s32 argc, u8** argv)
             }
 
             fprintf(fp, "\n");
-
-            haversine_sum += reference_haversine(coord1, coord2, EARTH_RADIUS);
+            
+            f64 result = reference_haversine(coord1, coord2, EARTH_RADIUS);
+            haversine_sum += result;
+            fwrite(&result, sizeof(result), 1, fp_results); 
         }
 
         fprintf(fp, "\t]\n");
@@ -159,6 +162,7 @@ main (s32 argc, u8** argv)
     }
 
     fclose(fp);
+    fclose(fp_results);
 
     printf("sum: %f\n", haversine_sum);
     printf("avg: %f\n", (haversine_sum/output_ammount));
