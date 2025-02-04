@@ -86,10 +86,18 @@ main (s32 argc, u8 **argv)
     u8 current_word[256] = "";
 
     u8 last_identifier[256] = "";
-    coordinate coords[2] = {};
-    s32 haversine_calc_ammount = 0;
+    s32 haversine_pairs_count = 0;
     f64 haversine_sum = 0;
     s32 amount_wrong = 0;
+
+    haversine_pair *coordinate_store = (haversine_pair*)mmap(
+        0, 
+        sizeof(haversine_pair) * 10000000,
+        PROT_WRITE,
+        MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE,
+        0,
+        0
+    );
 
     if (argc >= 2)
     {
@@ -115,6 +123,7 @@ main (s32 argc, u8 **argv)
 
 
     TIMED_BLOCK("parse");
+    haversine_pair pair = {0};
     while (cursor < json_size)
     {
         u8 character = *(json_memory+cursor);
@@ -151,34 +160,23 @@ main (s32 argc, u8 **argv)
                     {
                         if (strncmp(last_identifier, "x0", 2) == 0)
                         {
-                            coords[0].longitude = value;
+                            pair.coords[0].longitude = value;
                         }
                         else if (strncmp(last_identifier, "x1", 2) == 0)
                         {
-                            coords[1].longitude = value;
+                            pair.coords[1].longitude = value;
                         }
                         else if (strncmp(last_identifier, "y0", 2) == 0)
                         {
-                            coords[0].latitude = value;
+                            pair.coords[0].latitude = value;
                         }
                         else if (strncmp(last_identifier, "y1", 2) == 0)
                         {
-                            coords[1].latitude = value;
-                            TIMED_BANDWITH("calc", 4 * sizeof(f64));
-                            f64 haversine = reference_haversine(
-                                coords[0],
-                                coords[1],
-                                EARTH_RADIUS
-                            );
+                            pair.coords[1].latitude = value;
 
-                            amount_wrong += !check_haversine(*(results++), haversine);
-                            
-                            haversine_sum += haversine;
-                            TIMED_BANDWITH_END("calc");
-
-                            haversine_calc_ammount++;
-                            coords[0] = {0.0, 0.0};
-                            coords[1] = {0.0, 0.0};
+                            coordinate_store[haversine_pairs_count] = pair;
+                            haversine_pairs_count++;
+                            pair = {0};
                         }
                     }
                 }
@@ -188,7 +186,24 @@ main (s32 argc, u8 **argv)
     }
     TIMED_BLOCK_END("parse");
 
-    printf("Processed average: %f\n", (haversine_sum/(f64)haversine_calc_ammount));
+    TIMED_BANDWITH("calc",haversine_pairs_count * sizeof(haversine_pair));
+    for (u64 index = 0; index < haversine_pairs_count; ++index)
+    {
+        haversine_pair pair = coordinate_store[index];
+
+        f64 haversine = reference_haversine(
+            pair.coords[0],
+            pair.coords[1],
+            EARTH_RADIUS
+        );
+
+        amount_wrong += !check_haversine(*(results++), haversine);
+        
+        haversine_sum += haversine;
+    }
+    TIMED_BANDWITH_END("calc");
+
+    printf("Processed average: %f\n", (haversine_sum/(f64)haversine_pairs_count));
     printf("Wrong haversine products: %i\n", amount_wrong);
 
     TIMED_BLOCK_END("main");

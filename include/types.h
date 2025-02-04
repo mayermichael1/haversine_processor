@@ -28,6 +28,11 @@ struct coordinate
     f64 latitude;
 };
 
+struct haversine_pair
+{
+    coordinate coords[2];
+};
+
 #define assert(cmp) if (!(cmp)) { __builtin_trap();}
 
 #endif
