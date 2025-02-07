@@ -110,11 +110,23 @@ reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
     coord1.latitude = degrees_to_radians(coord1.latitude);
     coord2.latitude = degrees_to_radians(coord2.latitude);
 
+#if 1
     f64 a = mypow(mysin(delta_lat/2.0), 2.0) + 
             mycos(coord1.latitude) * mycos(coord2.latitude) * 
             mypow(mysin(delta_lon/2.0), 2.0); 
 
     f64 c = 2.0 * myasin(mysqrt(a));
+
+#endif
+
+#if 0
+    f64 a = pow(sin(delta_lat/2.0), 2.0) + 
+            cos(coord1.latitude) * cos(coord2.latitude) * 
+            pow(sin(delta_lon/2.0), 2.0); 
+
+    f64 c = 2.0 * asin(sqrt(a));
+
+#endif
 
     f64 result = earth_radius * c;
 
