@@ -205,6 +205,7 @@ main (s32 argc, u8 **argv)
 
     printf("Processed average: %f\n", (haversine_sum/(f64)haversine_pairs_count));
     printf("Wrong haversine products: %i\n", amount_wrong);
+    print_math_function_domains();
 
     TIMED_BLOCK_END("main");
     print_profiler();

@@ -54,4 +54,7 @@ degrees_to_radians (f64 degrees)
 f64 
 reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius);
 
+void
+print_math_function_domains ();
+
 #endif
