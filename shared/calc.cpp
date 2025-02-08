@@ -17,7 +17,7 @@ static f32 max_sqrt = -MAXFLOAT;
 static f32 min_sqrt = MAXFLOAT;
 
 inline f64 
-mypow (f32 x, f32 y)
+mypow (f64 x, f64 y)
 {
     f64 result = 0;
     if (x < min_pow)
@@ -34,7 +34,7 @@ mypow (f32 x, f32 y)
 }
 
 inline f64 
-mysin (f32 x)
+mysin (f64 x)
 {
     f64 result = 0;
     if (x < min_sin)
@@ -51,7 +51,7 @@ mysin (f32 x)
 }
 
 inline f64 
-mycos (f32 x)
+mycos (f64 x)
 {
     f64 result = 0;
     if (x < min_cos)
@@ -68,7 +68,7 @@ mycos (f32 x)
 }
 
 inline f64 
-myasin (f32 x)
+myasin (f64 x)
 {
     f64 result = 0;
     if (x < min_asin)
@@ -85,7 +85,7 @@ myasin (f32 x)
 }
 
 inline f64 
-mysqrt (f32 x)
+mysqrt (f64 x)
 {
     f64 result = 0;
     if (x < min_sqrt)
@@ -116,7 +116,6 @@ reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
             mypow(mysin(delta_lon/2.0), 2.0); 
 
     f64 c = 2.0 * myasin(mysqrt(a));
-
 #endif
 
 #if 0
