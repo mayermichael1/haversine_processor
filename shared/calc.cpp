@@ -1,17 +1,26 @@
 #include "calc.h"
 #include "stdio.h"
+#include <float.h>
 
-static f32 max_sin = -MAXFLOAT;
-static f32 min_sin = MAXFLOAT;
+#define DOMAIN_MIN_(name) min_ ##name
+#define DOMAIN_MIN(name) DOMAIN_MIN_(name)
 
-static f32 max_cos = -MAXFLOAT;
-static f32 min_cos= MAXFLOAT;
+#define DOMAIN_MAX_(name) max_ ##name
+#define DOMAIN_MAX(name) DOMAIN_MAX_(name)
 
-static f32 max_asin = -MAXFLOAT;
-static f32 min_asin = MAXFLOAT;
+#define EXPAND_MATH_FUNCTION(name, x) name(x)
 
-static f32 max_sqrt = -MAXFLOAT;
-static f32 min_sqrt = MAXFLOAT;
+#define DOMAIN_CHECK(name) \
+    static f64 DOMAIN_MIN(name) = DBL_MAX; \
+    static f64 DOMAIN_MAX(name) = -DBL_MAX; \
+    f64 domain_##name (f64 x) { \
+        f64 result = 0; \
+        if (x < DOMAIN_MIN(name)){ DOMAIN_MIN(name) = x; } \
+        else if (x > DOMAIN_MAX(name)){DOMAIN_MAX(name) = x;} \
+        result = EXPAND_MATH_FUNCTION(name, x); \
+        return result; \
+    }
+
 
 inline f64
 square (f64 x)
@@ -21,73 +30,10 @@ square (f64 x)
     return result;
 }
 
-inline f64 
-mysin (f64 x)
-{
-    f64 result = 0;
-    if (x < min_sin)
-    {
-        min_sin = x;
-    }
-    else if (x > max_sin)
-    {
-        max_sin = x;
-    }
-
-    result = sin(x);
-    return result;
-}
-
-inline f64 
-mycos (f64 x)
-{
-    f64 result = 0;
-    if (x < min_cos)
-    {
-        min_cos = x;
-    }
-    else if (x > max_cos)
-    {
-        max_cos = x;
-    }
-
-    result = cos(x);
-    return result;
-}
-
-inline f64 
-myasin (f64 x)
-{
-    f64 result = 0;
-    if (x < min_asin)
-    {
-        min_asin = x;
-    }
-    else if (x > max_asin)
-    {
-        max_asin = x;
-    }
-
-    result = asin(x);
-    return result;
-}
-
-inline f64 
-mysqrt (f64 x)
-{
-    f64 result = 0;
-    if (x < min_sqrt)
-    {
-        min_sqrt = x;
-    }
-    else if (x > max_sqrt)
-    {
-        max_sqrt = x;
-    }
-
-    result = sqrt(x);
-    return result;
-}
+DOMAIN_CHECK(sin)
+DOMAIN_CHECK(cos)
+DOMAIN_CHECK(asin)
+DOMAIN_CHECK(sqrt)
 
 f64 
 reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
@@ -99,10 +45,10 @@ reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
     f64 lat2 = degrees_to_radians(coord2.latitude);
 
 #if 1
-    f64 a = square(mysin(delta_lat/2.0)) +
-            mycos(lat1) * mycos(lat2) * square(mysin(delta_lon/2.0)); 
+    f64 a = square(domain_sin(delta_lat/2.0)) +
+            domain_cos(lat1) * domain_cos(lat2) * square(domain_sin(delta_lon/2.0)); 
 
-    f64 c = 2.0 * myasin(mysqrt(a));
+    f64 c = 2.0 * domain_asin(domain_sqrt(a));
 #endif
 
 #if 0
