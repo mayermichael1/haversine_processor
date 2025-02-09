@@ -1,78 +1,25 @@
 #include <stdio.h>
+#include <math.h>
+
 #include "profiler.h"
 #include "types.h"
-#include <sys/mman.h>
 
-extern "C" void nt_test(u64 buffer_size, u8 *buffer, u64 data_size, u8 *data);
-extern "C" void test(u64 buffer_size, u8 *buffer, u64 data_size, u8 *data);
 
-#define to_u32(value) *(u32*)(&value)
 
 s32 
 main (s32 argc, u8** argv )
 {
-    u64 KB = 1024;
-    u64 MB = KB * 1024;
-    u64 GB = MB * 1024;
-
-    u8 *buffer;
-    u64 buffer_size = GB * 3;
-    u8 *data;
-    u64 data_size = 32 * KB;
-
-    buffer = (u8*)mmap(
-        NULL, 
-        buffer_size, 
-        PROT_READ | PROT_WRITE, 
-        MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE,
-        0, 
-        0 
-    );
-
-    data = (u8*)mmap(
-        NULL, 
-        data_size, 
-        PROT_READ | PROT_WRITE, 
-        MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE,
-        0, 
-        0 
-    );
-
-    for (u64 i = 0; i < data_size; i+=8)
-    {
-        to_u32(data[i]) = i;
-    }
-
-    init_page_fault_counter();
-    u64 frequency = estimate_cpu_frequencies();
-    f64 seconds = 5.0;
-
-    TIMED_BANDWITH("nt_test", buffer_size);
-    nt_test(buffer_size, buffer, data_size, data);
-    TIMED_BANDWITH_END("nt_test");
-
-    TIMED_BANDWITH("test", buffer_size);
-    test(buffer_size, buffer, data_size, data);
-    TIMED_BANDWITH_END("test");
-
-    /*
-    for (u64 i = 0; i < buffer_size; i+=data_size)
-        {
-            printf("\n\n\n");
-            for (u64 d = 0; d < data_size; d+=64)
-            {
-                for (u64 c = 0; c < 64; c+=8)
-                {
-                    printf("%08i ", to_u32(buffer[i + d + c ]));
-                }
-                printf("\n");
-            }
-            printf("\n\n\n");
-        }
-    */
-
-
+    printf("sin(0.03) = %+.9f ( 0.0299955)\n", sin(0.03));
+    printf("sin(3.41) = %+.9f (-0.26519615)\n", sin(3.41));
+    printf("sin(0.22) = %+.9f ( 0.21822962)\n", sin(0.22));
+    printf("sin(2.10) = %+.9f ( 0.86320937)\n", sin(2.10));
+    printf("sin(1.60) = %+.9f ( 0.9995736)\n", sin(1.60));
+    printf("sin(0.41) = %+.9f ( 0.39860933)\n", sin(0.41));
+    printf("sin(2.54) = %+.9f ( 0.56595623)\n", sin(2.54));
+    printf("sin(4.75) = %+.9f (-0.99929279)\n", sin(4.75));
+    printf("sin(4.12) = %+.9f (-0.82960917)\n", sin(4.12));
+    printf("sin(5.37) = %+.9f (-0.7914547)\n", sin(5.37));
     print_profiler();
-    return 1;
+    return 0;
 }
 
