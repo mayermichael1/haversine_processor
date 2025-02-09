@@ -26,7 +26,7 @@ generate_random_coordinate (coordinate cluster_point = {})
     if (cluster_point.latitude == 0.0 && cluster_point.longitude == 0.0)
     {
         coord.longitude = -180.0 + (360.0 * random);
-        coord.latitude = -180.0 + (360.0 * random);
+        coord.latitude = -90.0 + (180.0 * random);
     }
     else 
     {
