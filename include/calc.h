@@ -48,6 +48,12 @@ degrees_to_radians (f64 degrees)
     return result;
 }
 
+typedef f64 (*math_function_pointer)(f64 x);
+
+f64 
+compare_math_implementations (f64 from, f64 to, f64 interval, 
+    math_function_pointer reference, math_function_pointer compare_to);
+
 ///
 /// \brief  reference haversine calculation
 ///

@@ -21,7 +21,27 @@
         return result; \
     }
 
+DOMAIN_CHECK(sin)
+DOMAIN_CHECK(cos)
+DOMAIN_CHECK(asin)
+DOMAIN_CHECK(sqrt)
 
+f64 
+compare_math_implementations (f64 from, f64 to, f64 interval, 
+    math_function_pointer reference, math_function_pointer compare_to)
+{
+    f64 max_error = 0;
+
+    for (f64 i = from; i < to; i+=interval)
+    {
+        f64 difference = reference(i)  - compare_to(i);
+        if (fabs(difference) > max_error)
+        {
+            max_error = fabs(difference);
+        }
+    }
+    return max_error;
+}
 inline f64
 square (f64 x)
 {
@@ -30,14 +50,11 @@ square (f64 x)
     return result;
 }
 
-DOMAIN_CHECK(sin)
-DOMAIN_CHECK(cos)
-DOMAIN_CHECK(asin)
-DOMAIN_CHECK(sqrt)
 
 f64 
 reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
 {
+    f64 (*sinref)(f64 x) = sin;
     f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
     f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
 

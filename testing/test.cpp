@@ -3,8 +3,13 @@
 
 #include "profiler.h"
 #include "types.h"
+#include "calc.h"
 
 
+f64 zero(f64 x)
+{
+    return 0;
+}
 
 s32 
 main (s32 argc, u8** argv )
@@ -19,6 +24,10 @@ main (s32 argc, u8** argv )
     printf("sin(4.75) = %+.9f (-0.99929279)\n", sin(4.75));
     printf("sin(4.12) = %+.9f (-0.82960917)\n", sin(4.12));
     printf("sin(5.37) = %+.9f (-0.7914547)\n", sin(5.37));
+
+    printf("max error sin to cos %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, cos));
+    printf("max error sin to sin %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, sin));
+    printf("max error sin to 0 %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, zero));
     print_profiler();
     return 0;
 }
