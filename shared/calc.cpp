@@ -101,3 +101,10 @@ my_sqrt (f64 x)
     result = _mm_cvtsd_f64(wide_result);
     return result;
 }
+
+f64 
+my_sin (f64 x)
+{
+    f64 result = (4 * x) / PI - (4 * x * x) / (PI * PI);
+    return result;
+}

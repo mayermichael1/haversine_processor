@@ -1,6 +1,8 @@
 #ifndef CALC_H
 #define CALC_H
 
+#define PI 3.14159265358979323846264338327950288419716939937510582097494459230781640628
+
 #include <math.h>
 
 #include "types.h"
@@ -65,5 +67,8 @@ print_math_function_domains ();
 
 f64 
 my_sqrt (f64 x);
+
+f64 
+my_sin (f64 x);
 
 #endif

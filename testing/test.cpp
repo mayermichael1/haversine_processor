@@ -31,6 +31,9 @@ main (s32 argc, u8** argv )
 
     printf("max error my_sqrt to sqrt %f\n", compare_math_implementations(-10.0, 10.0, 0.0001, sqrt, my_sqrt));
 
+    printf("max error my_sin to sin (0 to PI)%f\n", compare_math_implementations(0, PI, 0.0001, my_sin, sin));
+    printf("max error my_sin to sin (-PI to PI)%f\n", compare_math_implementations(-PI, PI, 0.0001, my_sin, sin));
+
     print_profiler();
     return 0;
 }
