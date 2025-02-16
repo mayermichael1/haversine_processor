@@ -63,4 +63,7 @@ reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius);
 void
 print_math_function_domains ();
 
+f64 
+my_sqrt (f64 x);
+
 #endif

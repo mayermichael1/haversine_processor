@@ -1,6 +1,7 @@
 #include "calc.h"
 #include "stdio.h"
 #include <float.h>
+#include "x86intrin.h"
 
 #define DOMAIN_MIN_(name) min_ ##name
 #define DOMAIN_MIN(name) DOMAIN_MIN_(name)
@@ -88,4 +89,15 @@ print_math_function_domains ()
     printf("cos : \tmin: %f\tmax: %f\n", min_cos, max_cos);
     printf("sqrt: \tmin: %f\tmax: %f\n", min_sqrt, max_sqrt);
     printf("asin: \tmin: %f\tmax: %f\n", min_asin, max_asin);
+}
+
+f64 
+my_sqrt (f64 x)
+{
+    f64 result = 0;
+    __m128d wide_input = _mm_set_sd(x);
+    __m128d wide_zero = _mm_set_sd(0);
+    __m128d wide_result = _mm_sqrt_sd(wide_zero, wide_input);
+    result = _mm_cvtsd_f64(wide_result);
+    return result;
 }
