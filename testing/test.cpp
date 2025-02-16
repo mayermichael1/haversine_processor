@@ -34,6 +34,8 @@ main (s32 argc, u8** argv )
     printf("max error my_sin to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001, my_sin, sin));
     printf("max error my_sin to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, my_sin, sin));
 
+    printf("my_sin(-PI/2): %f", my_sin(-PI/2));
+
     print_profiler();
     return 0;
 }

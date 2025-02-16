@@ -105,6 +105,12 @@ my_sqrt (f64 x)
 f64 
 my_sin (f64 x)
 {
-    f64 result = (4 * x) / PI - (4 * x * x) / (PI * PI);
+    f64 abs_x = fabs(x);
+    f64 result = (4 * abs_x) / PI - (4 * abs_x * abs_x) / (PI * PI);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
     return result;
 }
