@@ -31,10 +31,16 @@ main (s32 argc, u8** argv )
 
     printf("max error my_sqrt to sqrt %f\n", compare_math_implementations(-10.0, 10.0, 0.0001, sqrt, my_sqrt));
 
-    printf("max error my_sin to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001, my_sin, sin));
-    printf("max error my_sin to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, my_sin, sin));
+    printf("max error sin_half to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001, sin_half, sin));
+    printf("max error sin_half to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, sin_half, sin));
 
-    printf("my_sin(-PI/2): %f", my_sin(-PI/2));
+    printf("max error sin_quarter to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001,sin_quarter, sin));
+    printf("max error sin_quarter to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, sin_quarter, sin));
+
+    printf("max error cos_quarter to cos (0 to PI/2): %f\n", compare_math_implementations(0, PI/2, 0.0001,cos_quarter, cos));
+    printf("max error cos_quarter to cos (-PI/2 to PI/2): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, cos_quarter, cos));
+
+    printf("my_sin(-PI/2): %f\n", sin_half(-PI/2));
 
     print_profiler();
     return 0;

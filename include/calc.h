@@ -69,6 +69,12 @@ f64
 my_sqrt (f64 x);
 
 f64 
-my_sin (f64 x);
+sin_half (f64 x);
+
+f64 
+sin_quarter (f64 x);
+
+f64 
+cos_quarter (f64 x);
 
 #endif

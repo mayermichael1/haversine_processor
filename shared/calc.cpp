@@ -103,7 +103,7 @@ my_sqrt (f64 x)
 }
 
 f64 
-my_sin (f64 x)
+sin_half (f64 x)
 {
     f64 abs_x = fabs(x);
     f64 result = (4 * abs_x) / PI - (4 * abs_x * abs_x) / (PI * PI);
@@ -112,5 +112,30 @@ my_sin (f64 x)
     {
         result = result * (-1);
     }
+    return result;
+}
+
+f64 
+sin_quarter (f64 x)
+{
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+    f64 result = (4 * abs_x) / PI - (4 * abs_x * abs_x) / (PI * PI);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
+f64
+cos_quarter (f64 x)
+{
+    x += PI/2;
+    f64 result = sin_quarter(x);
     return result;
 }
