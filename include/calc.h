@@ -65,15 +65,16 @@ reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius);
 void
 print_math_function_domains ();
 
-f64 
-my_sqrt (f64 x);
 
+// NOTE: this does only approximate in range -PI to PI
 f64 
 sin_half (f64 x);
 
+// NOTE: this does only approximate in range -PI to PI
 f64 
 sin_quarter (f64 x);
 
+// NOTE: this does only approximate in range -PI/2 to PI/2
 f64 
 cos_quarter (f64 x);
 
