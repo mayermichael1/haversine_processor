@@ -25,20 +25,37 @@ main (s32 argc, u8** argv )
     printf("sin(4.12) = %+.9f (-0.82960917)\n", sin(4.12));
     printf("sin(5.37) = %+.9f (-0.7914547)\n", sin(5.37));
 
+    printf("\n");
     printf("max error sin to cos %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, cos));
     printf("max error sin to sin %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, sin));
     printf("max error sin to 0 %f\n", compare_math_implementations(-3.0, 3.0, 0.00001, sin, zero));
 
+    printf("\n");
     printf("max error my_sqrt to sqrt %f\n", compare_math_implementations(-10.0, 10.0, 0.0001, sqrt, my_sqrt));
 
+    printf("\n");
     printf("max error sin_half to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001, sin_half, sin));
     printf("max error sin_half to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, sin_half, sin));
 
+    printf("\n");
     printf("max error sin_quarter to sin (0 to PI): %f\n", compare_math_implementations(0, PI, 0.0001,sin_quarter, sin));
     printf("max error sin_quarter to sin (-PI to PI): %f\n", compare_math_implementations(-PI, PI, 0.0001, sin_quarter, sin));
 
+    printf("\n");
     printf("max error cos_quarter to cos (0 to PI/2): %f\n", compare_math_implementations(0, PI/2, 0.0001,cos_quarter, cos));
     printf("max error cos_quarter to cos (-PI/2 to PI/2): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, cos_quarter, cos));
+
+    printf("\n");
+    printf("max error sin_taylor_7 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_7, sin));
+    printf("max error sin_taylor_7 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_7, sin));
+
+    printf("\n");
+    printf("max error sin_taylor_9 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_9, sin));
+    printf("max error sin_taylor_9 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_9, sin));
+
+    printf("\n");
+    printf("max error sin_taylor_11 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_11, sin));
+    printf("max error sin_taylor_11 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_11, sin));
 
     printf("my_sin(-PI/2): %f\n", sin_half(-PI/2));
 

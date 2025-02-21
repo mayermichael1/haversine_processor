@@ -139,3 +139,80 @@ cos_quarter (f64 x)
     f64 result = sin_quarter(x);
     return result;
 }
+
+u64 
+factorial (u64 x)
+{
+    u64 result = 1;
+    for (u64 i = x; i > 0; --i)
+    {
+        result *= i;
+    }
+    return result;
+}
+
+f64
+sin_taylor_series (f64 x, u8 factor)
+{
+    f64 result = x;
+    f64 sign = -1;
+    u8 current_factor = 3;
+    while (current_factor < factor)
+    {
+        result += sign * pow(x, current_factor) / (f64)factorial(current_factor);
+        current_factor += 2;
+        sign *= -1;
+    }
+    return result;
+}
+
+f64
+sin_taylor_7(f64 x)
+{
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+    f64 result = sin_taylor_series(abs_x, 7);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
+f64
+sin_taylor_9(f64 x)
+{
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+    f64 result = sin_taylor_series(abs_x, 9);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
+f64
+sin_taylor_11(f64 x)
+{
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+    f64 result = sin_taylor_series(abs_x, 11);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
