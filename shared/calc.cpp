@@ -151,17 +151,47 @@ factorial (u64 x)
     return result;
 }
 
-f64
-sin_taylor_series (f64 x, u8 factor)
+f64 
+sin_taylor_series_coefficient (u64 factor)
 {
-    f64 result = x;
     f64 sign = -1;
-    u8 current_factor = 3;
-    while (current_factor < factor)
+    if (((factor-1) / 2) % 2 == 0)
     {
-        result += sign * pow(x, current_factor) / (f64)factorial(current_factor);
+        sign = 1;
+    }
+    f64 result = sign / (f64)factorial(factor);
+    return result;
+}
+
+f64
+sin_taylor_series_function (f64 x, u8 factor)
+{
+    f64 result = 0;
+    u8 current_factor = 1;
+    f64 x2 = x * x;
+
+    while (current_factor <= factor)
+    {
+        result += x * sin_taylor_series_coefficient(current_factor);
+        x = x * x2;
         current_factor += 2;
-        sign *= -1;
+    }
+    return result;
+}
+
+f64 sin_taylor_series (f64 x, u8 factor)
+{    
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+
+    f64 result = sin_taylor_series_function(abs_x, factor);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
     }
     return result;
 }
@@ -173,6 +203,7 @@ sin_taylor_test()
     for (u8 factor = 3; factor < 39; factor+=2)
     {
         f64 max_error = 0;
+        f64 x_at_max = 0;
 
         for (f64 x = -PI; x < PI; x+=0.000001)
         {
@@ -180,12 +211,14 @@ sin_taylor_test()
             if (fabs(difference) > max_error)
             {
                 max_error = fabs(difference);
+                x_at_max = x;
             }
         }
         printf(
-            "sin to sin_taylor_series_%i(-PI, PI, 0.000001) max error: %.20f\n",
+            "sin to sin_taylor_series_%i(-PI, PI, 0.000001) max error: %.20f at %.20f\n",
             factor,
-            max_error
+            max_error,
+            x_at_max
         );
     }
 

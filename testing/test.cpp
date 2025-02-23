@@ -50,6 +50,10 @@ main (s32 argc, u8** argv )
 
     sin_taylor_test();
 
+    printf("sin_taylor_21(-PI): %.20f\n", sin_taylor_series(-PI, 21));
+    printf("sin_taylor_23(-PI): %.20f\n", sin_taylor_series(-PI, 23));
+    printf("sin_taylor_25(-PI): %.20f\n", sin_taylor_series(-PI, 25));
+
     print_profiler();
     return 0;
 }
