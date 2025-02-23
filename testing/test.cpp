@@ -49,7 +49,10 @@ main (s32 argc, u8** argv )
     printf("\n");
 
     sin_taylor_test();
+    printf("\n");
+    sin_taylor_horner_test();
 
+    printf("\n");
     printf("sin_taylor_21(-PI): %.20f\n", sin_taylor_series(-PI, 21));
     printf("sin_taylor_23(-PI): %.20f\n", sin_taylor_series(-PI, 23));
     printf("sin_taylor_25(-PI): %.20f\n", sin_taylor_series(-PI, 25));

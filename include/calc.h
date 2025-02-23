@@ -59,6 +59,9 @@ compare_math_implementations (f64 from, f64 to, f64 interval,
 void 
 sin_taylor_test();
 
+void 
+sin_taylor_horner_test();
+
 ///
 /// \brief  reference haversine calculation
 ///
@@ -82,6 +85,9 @@ sin_quarter (f64 x);
 // NOTE: this does only approximate in range -PI/2 to PI/2
 f64 
 cos_quarter (f64 x);
+
+f64
+sin_taylor_series (f64 x, u8 factor);
 
 f64
 sin_taylor_series (f64 x, u8 factor);

@@ -196,6 +196,42 @@ f64 sin_taylor_series (f64 x, u8 factor)
     return result;
 }
 
+f64
+sin_taylor_series_horner_function (f64 x, u8 factor)
+{
+    f64 result = sin_taylor_series_coefficient(factor);
+    u8 current_factor = factor-2;
+    f64 x2 = x * x;
+
+    while (current_factor >= 1)
+    {
+        result *= x2;
+        result += sin_taylor_series_coefficient(current_factor);
+        current_factor -= 2;
+    }
+    result *= x;
+    return result;
+}
+
+
+f64
+sin_taylor_series_horner (f64 x, u8 factor)
+{    
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+
+    f64 result = sin_taylor_series_horner_function(abs_x, factor);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
 void 
 sin_taylor_test()
 {
@@ -215,7 +251,35 @@ sin_taylor_test()
             }
         }
         printf(
-            "sin to sin_taylor_series_%i(-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            "sin to sin_taylor_series_[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            factor,
+            max_error,
+            x_at_max
+        );
+    }
+
+}
+
+void 
+sin_taylor_horner_test()
+{
+
+    for (u8 factor = 3; factor < 39; factor+=2)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = -PI; x < PI; x+=0.000001)
+        {
+            f64 difference = sin(x)  - sin_taylor_series_horner(x, factor);
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        printf(
+            "sin to sin_taylor_series_horner[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
             factor,
             max_error,
             x_at_max
