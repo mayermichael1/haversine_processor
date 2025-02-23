@@ -45,19 +45,10 @@ main (s32 argc, u8** argv )
     printf("max error cos_quarter to cos (0 to PI/2): %f\n", compare_math_implementations(0, PI/2, 0.0001,cos_quarter, cos));
     printf("max error cos_quarter to cos (-PI/2 to PI/2): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, cos_quarter, cos));
 
-    printf("\n");
-    printf("max error sin_taylor_7 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_7, sin));
-    printf("max error sin_taylor_7 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_7, sin));
-
-    printf("\n");
-    printf("max error sin_taylor_9 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_9, sin));
-    printf("max error sin_taylor_9 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_9, sin));
-
-    printf("\n");
-    printf("max error sin_taylor_11 cos (0 to PI): %f\n", compare_math_implementations(0, PI/2, 0.0001,sin_taylor_11, sin));
-    printf("max error sin_taylor_11 cos (-PI to PI): %f\n", compare_math_implementations(-PI/2, PI/2, 0.0001, sin_taylor_11, sin));
-
     printf("my_sin(-PI/2): %f\n", sin_half(-PI/2));
+    printf("\n");
+
+    sin_taylor_test();
 
     print_profiler();
     return 0;

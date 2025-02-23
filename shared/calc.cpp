@@ -166,53 +166,27 @@ sin_taylor_series (f64 x, u8 factor)
     return result;
 }
 
-f64
-sin_taylor_7(f64 x)
+void 
+sin_taylor_test()
 {
-    f64 abs_x = fabs(x);
-    if (abs_x > PI/2)
-    {
-        abs_x = PI/2 - (abs_x - PI/2);
-    }
-    f64 result = sin_taylor_series(abs_x, 7);
 
-    if (x < 0.0)
+    for (u8 factor = 3; factor < 39; factor+=2)
     {
-        result = result * (-1);
-    }
-    return result;
-}
+        f64 max_error = 0;
 
-f64
-sin_taylor_9(f64 x)
-{
-    f64 abs_x = fabs(x);
-    if (abs_x > PI/2)
-    {
-        abs_x = PI/2 - (abs_x - PI/2);
+        for (f64 x = -PI; x < PI; x+=0.000001)
+        {
+            f64 difference = sin(x)  - sin_taylor_series(x, factor);
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+            }
+        }
+        printf(
+            "sin to sin_taylor_series_%i(-PI, PI, 0.000001) max error: %.20f\n",
+            factor,
+            max_error
+        );
     }
-    f64 result = sin_taylor_series(abs_x, 9);
 
-    if (x < 0.0)
-    {
-        result = result * (-1);
-    }
-    return result;
-}
-
-f64
-sin_taylor_11(f64 x)
-{
-    f64 abs_x = fabs(x);
-    if (abs_x > PI/2)
-    {
-        abs_x = PI/2 - (abs_x - PI/2);
-    }
-    f64 result = sin_taylor_series(abs_x, 11);
-
-    if (x < 0.0)
-    {
-        result = result * (-1);
-    }
-    return result;
 }

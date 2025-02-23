@@ -56,6 +56,9 @@ f64
 compare_math_implementations (f64 from, f64 to, f64 interval, 
     math_function_pointer reference, math_function_pointer compare_to);
 
+void 
+sin_taylor_test();
+
 ///
 /// \brief  reference haversine calculation
 ///
@@ -81,12 +84,5 @@ f64
 cos_quarter (f64 x);
 
 f64
-sin_taylor_7(f64 x);
-
-f64
-sin_taylor_9(f64 x);
-
-f64
-sin_taylor_11(f64 x);
-
+sin_taylor_series (f64 x, u8 factor);
 #endif
