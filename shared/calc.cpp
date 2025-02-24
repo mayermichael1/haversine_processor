@@ -199,15 +199,13 @@ f64 sin_taylor_series (f64 x, u8 factor)
 f64
 sin_taylor_series_horner_function (f64 x, u8 factor)
 {
-    f64 result = sin_taylor_series_coefficient(factor);
-    u8 current_factor = factor-2;
+    f64 result = 0;
     f64 x2 = x * x;
 
-    while (current_factor >= 1)
+    for (u8 current_factor = factor; current_factor >= 1; current_factor-=2)
     {
         result *= x2;
         result += sin_taylor_series_coefficient(current_factor);
-        current_factor -= 2;
     }
     result *= x;
     return result;
