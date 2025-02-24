@@ -211,6 +211,23 @@ sin_taylor_series_horner_function (f64 x, u8 factor)
     return result;
 }
 
+f64
+sin_taylor_series_horner_fmadd_function(f64 x, u8 factor)
+{
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(x * x);
+
+    for (u8 current_factor = factor; current_factor >= 1; current_factor-=2)
+    {
+        __m128d coefficient = _mm_set_sd(sin_taylor_series_coefficient(current_factor));
+        result = _mm_fmadd_sd(result, x2, coefficient);
+    }
+    
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= x;
+    return result_f64;
+}
+
 
 f64
 sin_taylor_series_horner (f64 x, u8 factor)
@@ -230,11 +247,29 @@ sin_taylor_series_horner (f64 x, u8 factor)
     return result;
 }
 
+f64
+sin_taylor_series_horner_fmadd (f64 x, u8 factor)
+{    
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+
+    f64 result = sin_taylor_series_horner_fmadd_function(abs_x, factor);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
 void 
 sin_taylor_test()
 {
 
-    for (u8 factor = 3; factor < 39; factor+=2)
+    for (u8 factor = 3; factor < 29; factor+=2)
     {
         f64 max_error = 0;
         f64 x_at_max = 0;
@@ -262,7 +297,7 @@ void
 sin_taylor_horner_test()
 {
 
-    for (u8 factor = 3; factor < 39; factor+=2)
+    for (u8 factor = 3; factor < 29; factor+=2)
     {
         f64 max_error = 0;
         f64 x_at_max = 0;
@@ -278,6 +313,34 @@ sin_taylor_horner_test()
         }
         printf(
             "sin to sin_taylor_series_horner[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            factor,
+            max_error,
+            x_at_max
+        );
+    }
+
+}
+
+void 
+sin_taylor_horner_fmadd_test()
+{
+
+    for (u8 factor = 3; factor < 29; factor+=2)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = -PI; x < PI; x+=0.000001)
+        {
+            f64 difference = sin(x)  - sin_taylor_series_horner_fmadd(x, factor);
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        printf(
+            "sin to sin_taylor_series_fmadd[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
             factor,
             max_error,
             x_at_max

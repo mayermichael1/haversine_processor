@@ -62,6 +62,9 @@ sin_taylor_test();
 void 
 sin_taylor_horner_test();
 
+void 
+sin_taylor_horner_fmadd_test();
+
 ///
 /// \brief  reference haversine calculation
 ///

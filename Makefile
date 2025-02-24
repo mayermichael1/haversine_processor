@@ -5,7 +5,7 @@ DEPFLAGS=-MP -MD
 INCLUDEDIRS=. include
 BUILDDIR=./build
 
-CUSTOMFLAGS=-D DEBUG
+CUSTOMFLAGS=-D DEBUG -mfma
 CXXFLAGS= $(OPT) $(DEPFLAGS) $(CUSTOMFLAGS) -g $(foreach dir, $(INCLUDEDIRS), -I$(dir))
 
 # binary gen

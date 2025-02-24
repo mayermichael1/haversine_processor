@@ -51,6 +51,8 @@ main (s32 argc, u8** argv )
     sin_taylor_test();
     printf("\n");
     sin_taylor_horner_test();
+    printf("\n");
+    sin_taylor_horner_fmadd_test();
 
     printf("\n");
     printf("sin_taylor_21(-PI): %.20f\n", sin_taylor_series(-PI, 21));
