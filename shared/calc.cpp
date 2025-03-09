@@ -163,6 +163,40 @@ sin_taylor_series_coefficient (u64 factor)
     return result;
 }
 
+f64 
+sin_coefficient_function(f64 x, f64 *coefficients, u8 count)
+{
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(x * x);
+
+    for (u8 i = count-1; i >= 0; --i)
+    {
+        __m128d coefficient = _mm_set_sd(coefficients[i]);
+        result = _mm_fmadd_sd(result, x2, coefficient);
+    }
+    
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= x;
+    return result_f64;
+}
+
+f64
+sin_taylor_series_horner_fmadd_function(f64 x, u8 factor)
+{
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(x * x);
+
+    for (u8 current_factor = factor; current_factor >= 1; current_factor-=2)
+    {
+        __m128d coefficient = _mm_set_sd(sin_taylor_series_coefficient(current_factor));
+        result = _mm_fmadd_sd(result, x2, coefficient);
+    }
+    
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= x;
+    return result_f64;
+}
+
 f64
 sin_taylor_series_function (f64 x, u8 factor)
 {
@@ -196,6 +230,24 @@ f64 sin_taylor_series (f64 x, u8 factor)
     return result;
 }
 
+f64 
+sin_coefficient_array (f64 x, f64 *coefficients, u8 count)
+{    
+    f64 abs_x = fabs(x);
+    if (abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+
+    f64 result = sin_coefficient_function(abs_x, coefficients, count);
+
+    if (x < 0.0)
+    {
+        result = result * (-1);
+    }
+    return result;
+}
+
 f64
 sin_taylor_series_horner_function (f64 x, u8 factor)
 {
@@ -209,23 +261,6 @@ sin_taylor_series_horner_function (f64 x, u8 factor)
     }
     result *= x;
     return result;
-}
-
-f64
-sin_taylor_series_horner_fmadd_function(f64 x, u8 factor)
-{
-    __m128d result = _mm_set_sd(0);
-    __m128d x2 = _mm_set_sd(x * x);
-
-    for (u8 current_factor = factor; current_factor >= 1; current_factor-=2)
-    {
-        __m128d coefficient = _mm_set_sd(sin_taylor_series_coefficient(current_factor));
-        result = _mm_fmadd_sd(result, x2, coefficient);
-    }
-    
-    f64 result_f64 = _mm_cvtsd_f64(result);
-    result_f64 *= x;
-    return result_f64;
 }
 
 
@@ -347,4 +382,67 @@ sin_taylor_horner_fmadd_test()
         );
     }
 
+}
+
+#include "sine_coefficients.cpp"
+
+void
+sin_coefficient_array_test()
+{
+    printf("Taylor series with pre-computed coefficients:\n");     
+    for (u8 factor_index = 0; factor_index <= 16; factor_index++)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = -PI; x < PI; x+=0.000001)
+        {
+            u8 count = factor_index + 1;
+            f64 difference = sin(x) - sin_coefficient_array(
+                x, 
+                SineRadiansC_Taylor,
+                count  
+            );
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        u8 factor = factor_index * 2 + 1;
+        printf(
+            "sin to sin_taylor_series_coefficients[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            factor,
+            max_error,
+            x_at_max
+        );
+    }
+
+    printf("Math for the Working Programmer coefficients:\n");
+
+    for(u8 max_count = 2; max_count <= 11; ++max_count)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = -PI; x < PI; x+=0.000001)
+        {
+            f64 difference = sin(x) - sin_coefficient_array(
+                x, 
+                SineRadiansC_MFTWP[max_count],
+                max_count
+            );
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        printf(
+            "sin to sin_coefficients[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            max_count,
+            max_error,
+            x_at_max
+        );
+    }
 }

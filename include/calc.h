@@ -65,6 +65,9 @@ sin_taylor_horner_test();
 void 
 sin_taylor_horner_fmadd_test();
 
+void
+sin_coefficient_array_test();
+
 ///
 /// \brief  reference haversine calculation
 ///
@@ -92,6 +95,8 @@ cos_quarter (f64 x);
 f64
 sin_taylor_series (f64 x, u8 factor);
 
-f64
-sin_taylor_series (f64 x, u8 factor);
+f64 
+sin_coefficient_array(f64 x, f64 *coefficients, u8 count);
+
+
 #endif
