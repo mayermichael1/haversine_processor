@@ -140,10 +140,10 @@ cos_quarter (f64 x)
     return result;
 }
 
-u64 
+f64 
 factorial (u64 x)
 {
-    u64 result = 1;
+    f64 result = 1;
     for (u64 i = x; i > 0; --i)
     {
         result *= i;
