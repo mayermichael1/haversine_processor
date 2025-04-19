@@ -466,6 +466,34 @@ sin_coefficient_array_test()
 
 #include "./arcsine_coefficients.cpp"
 
+f64
+asin_approximated(f64 x)
+{
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(x * x);
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][17]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][16]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][15]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][14]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][13]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][12]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][11]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][10]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][9]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][8]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][7]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][6]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][5]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][4]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][3]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][2]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][1]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(ArcsineRadiansC_MFTWP[18][0]));
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= x;
+    return result_f64;
+}
+
 void
 asin_coefficient_array_test()
 {
@@ -526,4 +554,23 @@ asin_coefficient_array_test()
             x_at_max
         );
     }
+
+    printf("handwritten acos approximation: \n");
+
+    f64 max_error = 0;
+    f64 x_at_max = 0;
+
+    for (f64 x = 0; x < (1/sqrt(2)); x+=0.000001)
+    {
+        f64 difference = asin(x) - asin_approximated(x);
+        if (fabs(difference) > max_error)
+        {
+            max_error = fabs(difference);
+            x_at_max = x;
+        }
+    } printf(
+        "asin to asin_approximated(0, 1/sqrt(2), 0.000001) max error: %.20f at %.20f\n",
+        max_error,
+        x_at_max
+    );
 }

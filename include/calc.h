@@ -98,11 +98,11 @@ cos_quarter (f64 x);
 f64
 sin_taylor_series (f64 x, u8 factor);
 
-f64 
-sin_coefficient_array(f64 x, f64 *coefficients, u8 count);
+//f64 
+//sin_coefficient_array(f64 x, f64 *coefficients, u8 count);
 
 f64
-asin_coeeficient_array(f64 x, f64 *coefficients, u8 count);
+asin_approximated(f64 x);
 
 
 #endif
