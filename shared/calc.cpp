@@ -249,6 +249,23 @@ sin_coefficient_array (f64 x, f64 *coefficients, u8 count)
 }
 
 f64
+asin_coefficient_array(f64 x, f64 *coefficients, u8 count)
+{
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(x * x);
+
+    for (u8 i = count-1; i >= 0; --i)
+    {
+        __m128d coefficient = _mm_set_sd(coefficients[i]);
+        result = _mm_fmadd_sd(result, x2, coefficient);
+    }
+    
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= x;
+    return result_f64;
+}
+
+f64
 sin_taylor_series_horner_function (f64 x, u8 factor)
 {
     f64 result = 0;
@@ -440,6 +457,70 @@ sin_coefficient_array_test()
         }
         printf(
             "sin to sin_coefficients[%i](-PI, PI, 0.000001) max error: %.20f at %.20f\n",
+            max_count,
+            max_error,
+            x_at_max
+        );
+    }
+}
+
+#include "./arcsine_coefficients.cpp"
+
+void
+asin_coefficient_array_test()
+{
+    printf("Taylor series with pre-computed coefficients:\n");     
+    for (u8 factor_index = 0; factor_index <= 28; factor_index++)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = 0; x < (1/sqrt(2)); x+=0.000001)
+        {
+            u8 count = factor_index + 1;
+            //TODO: change this calculation
+            f64 difference = asin(x) - asin_coefficient_array(
+                x, 
+                ArcsineRadiansC_Taylor,
+                count  
+            );
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        u8 factor = factor_index * 2 + 1;
+        printf(
+            "asin to asin_taylor_series_coefficients[%i](0, 1/sqrt(2), 0.000001) max error: %.20f at %.20f\n",
+            factor,
+            max_error,
+            x_at_max
+        );
+    }
+
+    printf("Math for the Working Programmer coefficients:\n");
+
+    for(u8 max_count = 2; max_count <= 22; ++max_count)
+    {
+        f64 max_error = 0;
+        f64 x_at_max = 0;
+
+        for (f64 x = 0; x < (1/sqrt(2)); x+=0.000001)
+        {
+            f64 difference = asin(x) - asin_coefficient_array(
+                x, 
+                ArcsineRadiansC_MFTWP[max_count],
+                max_count
+            );
+            if (fabs(difference) > max_error)
+            {
+                max_error = fabs(difference);
+                x_at_max = x;
+            }
+        }
+        printf(
+            "asin to asin_coefficients[%i](0, 1/sqrt(2), 0.000001) max error: %.20f at %.20f\n",
             max_count,
             max_error,
             x_at_max

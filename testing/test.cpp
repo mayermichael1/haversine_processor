@@ -55,6 +55,8 @@ main (s32 argc, u8** argv )
     sin_taylor_horner_fmadd_test();
     printf("\n");
     sin_coefficient_array_test();
+    printf("\n");
+    asin_coefficient_array_test();
 
     printf("\n");
 
