@@ -494,6 +494,21 @@ asin_approximated(f64 x)
     return result_f64;
 }
 
+f64 
+asin_core(f64 x)
+{
+    f64 value = 0;
+    if(x <= 1/my_sqrt(2.0))
+    {
+        value = asin_approximated(x);
+    }
+    else
+    {
+        value = PI/2.0 - asin_approximated(my_sqrt(1-(x*x)));
+    }
+    return value;
+}
+
 void
 asin_coefficient_array_test()
 {
@@ -573,4 +588,28 @@ asin_coefficient_array_test()
         max_error,
         x_at_max
     );
+}
+
+void
+asin_coefficient_array_test_extended()
+{
+    printf("handwritten asin extended to 0 to 1:\n");
+
+    f64 max_error = 0;
+    f64 x_at_max = 0;
+
+    for (f64 x = 0; x < 1; x+=0.000001)
+    {
+        f64 difference = asin(x) - asin_core(x);
+        if (fabs(difference) > max_error)
+        {
+            max_error = fabs(difference);
+            x_at_max = x;
+        }
+    }
+    printf(
+        "asin to asin_core(0, 1/sqrt(2), 0.000001) max error: %.20f at %.20f\n",
+        max_error,
+        x_at_max
+    ); 
 }

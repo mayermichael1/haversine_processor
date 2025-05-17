@@ -71,6 +71,9 @@ sin_coefficient_array_test();
 void 
 asin_coefficient_array_test();
 
+void 
+asin_coefficient_array_test_extended();
+
 ///
 /// \brief  reference haversine calculation
 ///
@@ -104,5 +107,10 @@ sin_taylor_series (f64 x, u8 factor);
 f64
 asin_approximated(f64 x);
 
+
+/// NOTE: 
+/// these are the final math functions that will be used for haversine calculation
+f64 
+asin_core(f64 x); //DONE
 
 #endif

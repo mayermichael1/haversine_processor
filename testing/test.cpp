@@ -57,6 +57,8 @@ main (s32 argc, u8** argv )
     sin_coefficient_array_test();
     printf("\n");
     asin_coefficient_array_test();
+    printf("\n");
+    asin_coefficient_array_test_extended();
 
     printf("\n");
 
