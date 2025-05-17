@@ -65,6 +65,8 @@ main (s32 argc, u8** argv )
 
     printf("\n");
 
+    compare_haversine_implementations();
+
     print_profiler();
     return 0;
 }

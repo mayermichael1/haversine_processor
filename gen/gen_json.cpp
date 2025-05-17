@@ -7,13 +7,6 @@
 #include "types.h"
 #include "calc.h"
 
-static f64
-rand_0_to_1 ()
-{
-    f64 result = (f64)rand()/ (f64)RAND_MAX;
-    return result;
-}
-
 ///
 /// \brief  generate a random floating number between -180.0 and 180.0
 ///

@@ -53,33 +53,60 @@ square (f64 x)
 
 
 f64 
-reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius)
+reference_haversine_domain_check ( coordinate coord1, coordinate coord2, f64 earth_radius)
 {
-    f64 (*sinref)(f64 x) = sin;
     f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
     f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
 
     f64 lat1 = degrees_to_radians(coord1.latitude);
     f64 lat2 = degrees_to_radians(coord2.latitude);
 
-#if 1
     f64 a = square(domain_sin(delta_lat/2.0)) +
             domain_cos(lat1) * domain_cos(lat2) * square(domain_sin(delta_lon/2.0)); 
 
     f64 c = 2.0 * domain_asin(domain_sqrt(a));
-#endif
 
-#if 0
+    f64 result = earth_radius * c;
+
+    return result;
+}
+
+f64 
+reference_haversine( coordinate coord1, coordinate coord2, f64 earth_radius)
+{
+    f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
+    f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
+
+    f64 lat1 = degrees_to_radians(coord1.latitude);
+    f64 lat2 = degrees_to_radians(coord2.latitude);
+
     f64 a = square(sin(delta_lat/2.0)) +
             cos(lat1) * cos(lat2) * square(sin(delta_lon/2.0)); 
 
     f64 c = 2.0 * asin(sqrt(a));
 
-#endif
+    f64 result = earth_radius * c;
+
+    return result;
+}
+
+f64 haversine_core(coordinate coord1, coordinate coord2, f64 earth_radius)
+{
+    f64 delta_lat = degrees_to_radians(coord2.latitude - coord1.latitude); 
+    f64 delta_lon = degrees_to_radians(coord2.longitude - coord1.longitude);
+
+    f64 lat1 = degrees_to_radians(coord1.latitude);
+    f64 lat2 = degrees_to_radians(coord2.latitude);
+
+    f64 a = square(sin_core(delta_lat/2.0)) +
+            cos_core(lat1) * cos_core(lat2) * square(sin_core(delta_lon/2.0)); 
+
+    f64 c = 2.0 * asin_core(sqrt_core(a));
 
     f64 result = earth_radius * c;
 
     return result;
+
 }
 
 void
@@ -672,4 +699,32 @@ test_core_functions()
     printf("sqrt to sqrt_core(0, 1, 0.000001) max error: %.20f\n",compare_math_implementations(0, 1, 0.000001, sqrt, sqrt_core));
     printf("sin to sin_core(-PI, PI, 0.000001) max error: %.20f\n",compare_math_implementations(-PI, PI, 0.000001, sin, sin_core));
     printf("cos to cos_core(-PI/2, PI/2, 0.000001) max error: %.20f\n",compare_math_implementations(-PI/2, PI/2, 0.000001, cos, cos_core));
+}
+
+void 
+compare_haversine_implementations()
+{
+   //TODO: compare the haversine implementations here 
+    coordinate coord1 = {};
+    coordinate coord2 = {};
+    f64 max_error = 0;
+
+    for(u32 i = 0; i < 100000; ++i)
+    {
+        f64 random = rand_0_to_1();
+        coord1.longitude = -180.0 + (360.0 * random);
+        coord1.latitude = -90.0 + (180.0 * random);
+        random = rand_0_to_1();
+        coord2.longitude = -180.0 + (360.0 * random);
+        coord2.latitude = -90.0 + (180.0 * random);
+
+        f64 difference = 
+            reference_haversine(coord1, coord2, EARTH_RADIUS) - 
+            haversine_core(coord1, coord2, EARTH_RADIUS);
+        if (fabs(difference) > max_error)
+        {
+            max_error = fabs(difference);
+        }
+    }
+    printf("max error reference_haversine to haversine_core: %.20f\n", max_error);
 }

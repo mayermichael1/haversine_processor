@@ -52,6 +52,13 @@ degrees_to_radians (f64 degrees)
 
 typedef f64 (*math_function_pointer)(f64 x);
 
+inline static f64
+rand_0_to_1 ()
+{
+    f64 result = (f64)rand()/ (f64)RAND_MAX;
+    return result;
+}
+
 f64 
 compare_math_implementations (f64 from, f64 to, f64 interval, 
     math_function_pointer reference, math_function_pointer compare_to);
@@ -82,6 +89,12 @@ test_core_functions();
 ///
 f64 
 reference_haversine ( coordinate coord1, coordinate coord2, f64 earth_radius);
+
+f64 
+haversine_core(coordinate coord1, coordinate coord2, f64 earth_radius);
+
+void 
+compare_haversine_implementations();
 
 void
 print_math_function_domains ();
@@ -118,5 +131,11 @@ asin_core(f64 x);
 
 f64 
 sqrt_core(f64 x);
+
+f64
+sin_core(f64 x);
+
+f64
+cos_core(f64 x);
 
 #endif
