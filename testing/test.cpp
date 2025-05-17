@@ -61,6 +61,9 @@ main (s32 argc, u8** argv )
     asin_coefficient_array_test_extended();
 
     printf("\n");
+    test_core_functions();
+
+    printf("\n");
 
     print_profiler();
     return 0;

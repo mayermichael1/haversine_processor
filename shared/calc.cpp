@@ -248,6 +248,7 @@ sin_coefficient_array (f64 x, f64 *coefficients, u8 count)
     return result;
 }
 
+
 f64
 asin_coefficient_array(f64 x, f64 *coefficients, u8 count)
 {
@@ -509,6 +510,56 @@ asin_core(f64 x)
     return value;
 }
 
+f64 
+sin_core(f64 x)
+{
+    f64 abs_x = fabs(x);
+    if(abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+    __m128d result = _mm_set_sd(0);
+    __m128d x2 = _mm_set_sd(abs_x * abs_x);
+
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][8]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][7]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][6]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][5]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][4]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][3]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][2]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][1]));
+    result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][0]));
+    
+    f64 result_f64 = _mm_cvtsd_f64(result);
+    result_f64 *= abs_x;
+
+    if(x < 0.0)
+    {
+        result_f64 *= -1;
+    }
+    return result_f64;
+}
+
+f64
+cos_core(f64 x)
+{
+    x += PI/2;
+    f64 result = sin_core(x);
+    return result;
+}
+
+f64 
+sqrt_core(f64 x)
+{
+    f64 result = 0;
+    __m128d wide_input = _mm_set_sd(x);
+    __m128d wide_zero = _mm_set_sd(0);
+    __m128d wide_result = _mm_sqrt_sd(wide_zero, wide_input);
+    result = _mm_cvtsd_f64(wide_result);
+    return result;
+}
+
 void
 asin_coefficient_array_test()
 {
@@ -612,4 +663,13 @@ asin_coefficient_array_test_extended()
         max_error,
         x_at_max
     ); 
+}
+
+void 
+test_core_functions()
+{
+    printf("asin to asin_core(0, 1, 0.000001) max error: %.20f\n",compare_math_implementations(0, 1, 0.000001, asin, asin_core));
+    printf("sqrt to sqrt_core(0, 1, 0.000001) max error: %.20f\n",compare_math_implementations(0, 1, 0.000001, sqrt, sqrt_core));
+    printf("sin to sin_core(-PI, PI, 0.000001) max error: %.20f\n",compare_math_implementations(-PI, PI, 0.000001, sin, sin_core));
+    printf("cos to cos_core(-PI/2, PI/2, 0.000001) max error: %.20f\n",compare_math_implementations(-PI/2, PI/2, 0.000001, cos, cos_core));
 }
