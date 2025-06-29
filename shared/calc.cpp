@@ -827,13 +827,13 @@ core_2_haversine_loop(haversine_pair *pairs, u64 pair_count)
         f64 delta_lat = (coord2.latitude - coord1.latitude) * rad_coeff; 
         f64 delta_lon = (coord2.longitude - coord1.longitude) * rad_coeff;
 
-        f64 lat1 = rad_coeff * coord1.latitude;
-        f64 lat2 = rad_coeff * coord2.latitude;
-
         f64 half_pi = PI / 2.0;
+        f64 lat1 = fma(rad_coeff, coord1.latitude, half_pi);
+        f64 lat2 = fma(rad_coeff, coord2.latitude, half_pi);
+
         f64 sin_0 = sin_core(delta_lat/2.0);
-        f64 sin_1 = sin_core(lat1 + half_pi);
-        f64 sin_2 = sin_core(lat2 + half_pi);
+        f64 sin_1 = sin_core(lat1);
+        f64 sin_2 = sin_core(lat2);
         f64 sin_3 = sin_core(delta_lon/2.0);
 
         f64 a = sin_0 * sin_0 + sin_1 * sin_2 * sin_3 * sin_3;
