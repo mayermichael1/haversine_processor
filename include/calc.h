@@ -113,6 +113,8 @@ f64
 core_3_haversine_loop(haversine_pair *pairs, u64 pair_count);
 f64 
 core_4_haversine_loop(haversine_pair *pairs, u64 pair_count);
+f64 
+core_5_haversine_loop(haversine_pair *pairs, u64 pair_count);
 
 void
 print_math_function_domains ();
