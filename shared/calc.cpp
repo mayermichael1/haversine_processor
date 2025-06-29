@@ -1255,10 +1255,10 @@ core_9_haversine_loop(haversine_pair *pairs, u64 pair_count)
         f64 sin_3 = sin_core(sin_3_abs);
 
         f64 a = fma(sin_0, sin_0, sin_1 * sin_2 * sin_3 * sin_3);
-        f64 sqrt_a = sqrt_core(a);
 
         b8 needs_transform = (a > 0.5);
         f64 range_a = needs_transform ? (1.0 - a) : a;
+        f64 sqrt_a = sqrt_core(range_a);
         f64 asin_a_untransformed = asin_approximated(sqrt_a);
         f64 asin_a = needs_transform ? (half_pi - asin_a_untransformed) : asin_a_untransformed;
 
@@ -1307,11 +1307,10 @@ core_10_haversine_loop(haversine_pair *pairs, u64 pair_count)
         f64 sin_3 = sin_core(sin_3_abs);
 
         f64 a = fma(sin_0, sin_0, sin_1 * sin_2 * sin_3 * sin_3);
-        f64 sqrt_a = sqrt_core(a);
 
         b8 needs_transform = (a > 0.5);
         f64 range_a = needs_transform ? (1.0 - a) : a;
-        f64 asin_a_untransformed = asin_approximated_squared(a);
+        f64 asin_a_untransformed = asin_approximated_squared(range_a);
         f64 asin_a = needs_transform ? (half_pi - asin_a_untransformed) : asin_a_untransformed;
 
         f64 c = 2.0 * asin_a;
