@@ -220,6 +220,7 @@ main (s32 argc, u8 **argv)
         {"haversine_core", core_haversine_loop},
         {"haversine_core_1", core_1_haversine_loop},
         {"haversine_core_2", core_2_haversine_loop},
+        {"haversine_core_3", core_3_haversine_loop},
     };
 
     for(u32 i = 0; i < sizeof(implementations) / sizeof(haversine_loop_test_function); ++i)
