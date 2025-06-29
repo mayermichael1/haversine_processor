@@ -781,10 +781,75 @@ core_1_haversine_loop(haversine_pair *pairs, u64 pair_count)
         f64 lat1 = rad_coeff * coord1.latitude;
         f64 lat2 = rad_coeff * coord2.latitude;
 
-        f64 a = square(sin_core(delta_lat/2.0)) + 
-                cos_core(lat1) * cos_core(lat2) * square(sin_core(delta_lon/2.0)); 
+        f64 half_pi = PI / 2.0;
+        f64 sin_0 = sin_core(delta_lat/2.0);
+        f64 sin_1 = sin_core(lat1 + half_pi);
+        f64 sin_2 = sin_core(lat2 + half_pi);
+        f64 sin_3 = sin_core(delta_lon/2.0);
 
-        f64 c = 2.0 * asin_core(sqrt_core(a));
+        f64 a = sin_0 * sin_0 + sin_1 * sin_2 * sin_3 * sin_3;
+        f64 sqrt_a = sqrt_core(a);
+
+        f64 asin_a = 0;
+        if(sqrt_a <= 1/sqrt_core(2.0))
+        {
+            asin_a = asin_approximated(sqrt_a);
+        }
+        else
+        {
+            asin_a = PI/2.0 - asin_approximated(sqrt_core(1-(sqrt_a * sqrt_a)));
+        }
+        f64 c = 2.0 * asin_a;
+
+
+        f64 distance = EARTH_RADIUS * c;
+
+        sum_average += sum_coeff * distance;
+        iterator++;
+    }
+    return sum_average; 
+}
+
+f64 
+core_2_haversine_loop(haversine_pair *pairs, u64 pair_count)
+{
+    haversine_pair *iterator = pairs;
+    f64 sum_coeff = 1.0 / (f64)pair_count;
+    f64 sum_average = 0; 
+    while(iterator < (pairs + pair_count))
+    {
+        haversine_pair pair = *iterator; 
+
+        coordinate coord1 = pair.coords[0];
+        coordinate coord2 = pair.coords[1];
+
+        f64 rad_coeff = 0.01745329251994329577f;
+        f64 delta_lat = (coord2.latitude - coord1.latitude) * rad_coeff; 
+        f64 delta_lon = (coord2.longitude - coord1.longitude) * rad_coeff;
+
+        f64 lat1 = rad_coeff * coord1.latitude;
+        f64 lat2 = rad_coeff * coord2.latitude;
+
+        f64 half_pi = PI / 2.0;
+        f64 sin_0 = sin_core(delta_lat/2.0);
+        f64 sin_1 = sin_core(lat1 + half_pi);
+        f64 sin_2 = sin_core(lat2 + half_pi);
+        f64 sin_3 = sin_core(delta_lon/2.0);
+
+        f64 a = sin_0 * sin_0 + sin_1 * sin_2 * sin_3 * sin_3;
+        f64 sqrt_a = sqrt_core(a);
+
+        f64 asin_a = 0;
+        if(sqrt_a <= 1/sqrt_core(2.0))
+        {
+            asin_a = asin_approximated(sqrt_a);
+        }
+        else
+        {
+            asin_a = PI/2.0 - asin_approximated(sqrt_core(1-(sqrt_a * sqrt_a)));
+        }
+        f64 c = 2.0 * asin_a;
+
 
         f64 distance = EARTH_RADIUS * c;
 

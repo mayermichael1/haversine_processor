@@ -1,5 +1,5 @@
 CXX=g++
-OPT=-O0
+OPT=-O2
 DEPFLAGS=-MP -MD
 
 INCLUDEDIRS=. include

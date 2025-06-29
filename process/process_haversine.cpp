@@ -218,6 +218,7 @@ main (s32 argc, u8 **argv)
     haversine_loop_test_function implementations[] = {
         {"haversine_reference", reference_haversine_loop},
         {"haversine_core", core_haversine_loop},
+        {"haversine_core_1", core_1_haversine_loop},
     };
 
     for(u32 i = 0; i < sizeof(implementations) / sizeof(haversine_loop_test_function); ++i)

@@ -103,12 +103,12 @@ struct haversine_loop_test_function
 };
 f64 
 reference_haversine_loop(haversine_pair *pairs, u64 pair_count);
-
 f64 
 core_haversine_loop(haversine_pair *pairs, u64 pair_count);
-
 f64 
 core_1_haversine_loop(haversine_pair *pairs, u64 pair_count);
+f64 
+core_2_haversine_loop(haversine_pair *pairs, u64 pair_count);
 
 void
 print_math_function_domains ();
