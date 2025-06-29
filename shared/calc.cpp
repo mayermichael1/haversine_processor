@@ -537,16 +537,11 @@ asin_core(f64 x)
     return value;
 }
 
-f64 
-sin_core(f64 x)
+inline f64 
+sin_core_raw(f64 x)
 {
-    f64 abs_x = fabs(x);
-    if(abs_x > PI/2)
-    {
-        abs_x = PI/2 - (abs_x - PI/2);
-    }
     __m128d result = _mm_set_sd(0);
-    __m128d x2 = _mm_set_sd(abs_x * abs_x);
+    __m128d x2 = _mm_set_sd(x * x);
 
     result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][8]));
     result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][7]));
@@ -559,13 +554,25 @@ sin_core(f64 x)
     result = _mm_fmadd_sd(result, x2, _mm_set_sd(SineRadiansC_MFTWP[9][0]));
     
     f64 result_f64 = _mm_cvtsd_f64(result);
-    result_f64 *= abs_x;
+    result_f64 *= x;
+    return result_f64;
+}
+f64 
+sin_core(f64 x)
+{
+    f64 abs_x = fabs(x);
+    if(abs_x > PI/2)
+    {
+        abs_x = PI/2 - (abs_x - PI/2);
+    }
+
+    f64 result = sin_core_raw(abs_x);
 
     if(x < 0.0)
     {
-        result_f64 *= -1;
+        result *= -1;
     }
-    return result_f64;
+    return result;
 }
 
 f64
@@ -990,6 +997,61 @@ core_5_haversine_loop(haversine_pair *pairs, u64 pair_count)
         f64 sin_0 = sin_core(delta_lat/2.0);
         f64 sin_1 = sin_core(lat1);
         f64 sin_2 = sin_core(lat2);
+        f64 sin_3 = sin_core(delta_lon/2.0);
+
+        f64 a = fma(sin_0, sin_0, sin_1 * sin_2 * sin_3 * sin_3);
+        f64 sqrt_a = sqrt_core(a);
+
+        f64 asin_a = 0;
+        if(a <= 0.5)
+        {
+            asin_a = asin_approximated(sqrt_a);
+        }
+        else
+        {
+            f64 asin_sqrt = sqrt_core(1-a);
+            asin_a = half_pi - asin_approximated(asin_sqrt);
+        }
+        f64 c = 2.0 * asin_a;
+
+
+        f64 distance = EARTH_RADIUS * c;
+
+        sum_average = fma(sum_coeff, distance, sum_average);
+        iterator++;
+    }
+    return sum_average; 
+}
+
+
+f64 
+core_6_haversine_loop(haversine_pair *pairs, u64 pair_count)
+{
+    // sin sign check is not needed as well as the fixup at the end
+    haversine_pair *iterator = pairs;
+    f64 sum_coeff = 1.0 / (f64)pair_count;
+    f64 sum_average = 0; 
+
+    while(iterator < (pairs + pair_count))
+    {
+        haversine_pair pair = *iterator; 
+
+        coordinate coord1 = pair.coords[0];
+        coordinate coord2 = pair.coords[1];
+
+        f64 rad_coeff = 0.01745329251994329577f;
+        f64 delta_lat = (coord2.latitude - coord1.latitude) * rad_coeff; 
+        f64 delta_lon = (coord2.longitude - coord1.longitude) * rad_coeff;
+
+        f64 half_pi = PI / 2.0;
+        f64 lat1 = fma(rad_coeff, coord1.latitude, half_pi);
+        f64 lat2 = fma(rad_coeff, coord2.latitude, half_pi);
+        f64 shifted_lat1 = (lat1 > half_pi) ? PI - lat1 : lat1;
+        f64 shifted_lat2 = (lat2 > half_pi) ? PI - lat2 : lat2;
+        f64 sin_1 = sin_core_raw(shifted_lat1);
+        f64 sin_2 = sin_core_raw(shifted_lat2);
+
+        f64 sin_0 = sin_core(delta_lat/2.0);
         f64 sin_3 = sin_core(delta_lon/2.0);
 
         f64 a = fma(sin_0, sin_0, sin_1 * sin_2 * sin_3 * sin_3);
