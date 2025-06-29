@@ -744,3 +744,20 @@ reference_haversine_loop(haversine_pair *pairs, u64 pair_count)
     }
     return sum_average; 
 }
+
+f64 
+core_haversine_loop(haversine_pair *pairs, u64 pair_count)
+{    
+    haversine_pair *iterator = pairs;
+    f64 sum_coeff = 1.0 / (f64)pair_count;
+    f64 sum_average = 0; 
+    while(iterator < (pairs + pair_count))
+    {
+        haversine_pair pair = *iterator; 
+        f64 distance = haversine_core(pair.coords[0], pair.coords[1], EARTH_RADIUS);
+        sum_average += sum_coeff * distance;
+        iterator++;
+    }
+    return sum_average; 
+
+}

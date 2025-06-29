@@ -221,6 +221,12 @@ main (s32 argc, u8 **argv)
     printf("reference_haversine:\tsum: %+34.24f\terror: %+34.24f\n", distance, error);
     TIMED_BANDWITH_END("reference_calc");
 
+    TIMED_BANDWITH("core_calc", haversine_pairs_count * sizeof(haversine_pair));
+    f64 distance = core_haversine_loop(coordinate_store, haversine_pairs_count);
+    f64 error = fabs(distance - reference_sum_average);
+    printf("core_haversine:\tsum: %+34.24f\terror: %+34.24f\n", distance, error);
+    TIMED_BANDWITH_END("core_calc");
+
 
     TIMED_BLOCK_END("main");
     printf("\n");
