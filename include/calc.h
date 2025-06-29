@@ -96,11 +96,19 @@ haversine_core(coordinate coord1, coordinate coord2, f64 earth_radius);
 void 
 compare_haversine_implementations();
 
+struct haversine_loop_test_function
+{
+    const char *function_name;
+    f64 (*function_call)(haversine_pair *pairs, u64 pair_count);
+};
 f64 
 reference_haversine_loop(haversine_pair *pairs, u64 pair_count);
 
 f64 
 core_haversine_loop(haversine_pair *pairs, u64 pair_count);
+
+f64 
+core_1_haversine_loop(haversine_pair *pairs, u64 pair_count);
 
 void
 print_math_function_domains ();

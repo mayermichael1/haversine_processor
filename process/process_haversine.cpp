@@ -215,18 +215,20 @@ main (s32 argc, u8 **argv)
     // check different haversine implementations here
     printf("\nDifferent Haversine calculations compared here:\n");
 
-    TIMED_BANDWITH("reference_calc", haversine_pairs_count * sizeof(haversine_pair));
-    f64 distance = reference_haversine_loop(coordinate_store, haversine_pairs_count);
-    f64 error = fabs(distance - reference_sum_average);
-    printf("reference_haversine:\tsum: %+34.24f\terror: %+34.24f\n", distance, error);
-    TIMED_BANDWITH_END("reference_calc");
+    haversine_loop_test_function implementations[] = {
+        {"haversine_reference", reference_haversine_loop},
+        {"haversine_core", core_haversine_loop},
+    };
 
-    TIMED_BANDWITH("core_calc", haversine_pairs_count * sizeof(haversine_pair));
-    f64 distance = core_haversine_loop(coordinate_store, haversine_pairs_count);
-    f64 error = fabs(distance - reference_sum_average);
-    printf("core_haversine:\tsum: %+34.24f\terror: %+34.24f\n", distance, error);
-    TIMED_BANDWITH_END("core_calc");
-
+    for(u32 i = 0; i < sizeof(implementations) / sizeof(haversine_loop_test_function); ++i)
+    {
+        haversine_loop_test_function implementation = implementations[i];
+        TIMED_BANDWITH(implementation.function_name, haversine_pairs_count * sizeof(haversine_pair));
+        f64 distance = implementation.function_call(coordinate_store, haversine_pairs_count);
+        f64 error = fabs(distance - reference_sum_average);
+        printf("%s:\tsum: %+34.24f\terror: %+34.24f\n",implementation.function_name, distance, error);
+        TIMED_BANDWITH_END(implementation.function_name);
+    }
 
     TIMED_BLOCK_END("main");
     printf("\n");
