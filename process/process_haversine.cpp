@@ -202,12 +202,28 @@ main (s32 argc, u8 **argv)
         haversine_sum += haversine;
     }
     TIMED_BANDWITH_END("calc");
+    f64 reference_sum_average = *results;
 
-    printf("Processed average: %f\n", (haversine_sum/(f64)haversine_pairs_count));
+    f64 haversine_average = haversine_sum / (f64)haversine_pairs_count;
+    printf("Processed average: %f\n", haversine_average);
     printf("Wrong haversine products: %i\n", amount_wrong);
-    print_math_function_domains();
+    printf("Average Sum Error: %+34.24f\n", fabs(haversine_average - reference_sum_average));
+
+    //print_math_function_domains();
+    //
+
+    // check different haversine implementations here
+    printf("\nDifferent Haversine calculations compared here:\n");
+
+    TIMED_BANDWITH("reference_calc", haversine_pairs_count * sizeof(haversine_pair));
+    f64 distance = reference_haversine_loop(coordinate_store, haversine_pairs_count);
+    f64 error = fabs(distance - reference_sum_average);
+    printf("reference_haversine:\tsum: %+34.24f\terror: %+34.24f\n", distance, error);
+    TIMED_BANDWITH_END("reference_calc");
+
 
     TIMED_BLOCK_END("main");
+    printf("\n");
     print_profiler();
 
     return 0;
