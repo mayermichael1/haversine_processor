@@ -764,6 +764,7 @@ core_haversine_loop(haversine_pair *pairs, u64 pair_count)
 f64 
 core_1_haversine_loop(haversine_pair *pairs, u64 pair_count)
 {
+    // expanded haversine
     haversine_pair *iterator = pairs;
     f64 sum_coeff = 1.0 / (f64)pair_count;
     f64 sum_average = 0; 
@@ -813,6 +814,7 @@ core_1_haversine_loop(haversine_pair *pairs, u64 pair_count)
 f64 
 core_2_haversine_loop(haversine_pair *pairs, u64 pair_count)
 {
+    // fma used for lat1 calculation  half_pi is directly added
     haversine_pair *iterator = pairs;
     f64 sum_coeff = 1.0 / (f64)pair_count;
     f64 sum_average = 0; 
@@ -863,6 +865,7 @@ core_2_haversine_loop(haversine_pair *pairs, u64 pair_count)
 f64 
 core_3_haversine_loop(haversine_pair *pairs, u64 pair_count)
 {
+    // fma used for sum accumulation
     haversine_pair *iterator = pairs;
     f64 sum_coeff = 1.0 / (f64)pair_count;
     f64 sum_average = 0; 
@@ -913,6 +916,7 @@ core_3_haversine_loop(haversine_pair *pairs, u64 pair_count)
 f64 
 core_4_haversine_loop(haversine_pair *pairs, u64 pair_count)
 {
+    // part of the actual calculation now uses fma
     haversine_pair *iterator = pairs;
     f64 sum_coeff = 1.0 / (f64)pair_count;
     f64 sum_average = 0; 
@@ -963,6 +967,7 @@ core_4_haversine_loop(haversine_pair *pairs, u64 pair_count)
 f64 
 core_5_haversine_loop(haversine_pair *pairs, u64 pair_count)
 {
+    // remove unneded asin sqrt
     haversine_pair *iterator = pairs;
     f64 sum_coeff = 1.0 / (f64)pair_count;
     f64 sum_average = 0; 
